@@ -1,0 +1,33 @@
+# @package _global_
+
+defaults:
+  - _self_
+
+# Data paths
+data_dir: data/raw
+model_dir: models
+
+# Training hyperparameters
+batch_size: 32
+num_epochs: 10
+learning_rate: 0.001
+
+# Device (null = auto-detect)
+device: null
+
+# Model parameters
+num_classes: 2
+
+# Data augmentation
+augmentation:
+  train:
+    resize: [224, 224]
+    random_horizontal_flip: 0.5
+    random_rotation: 10
+  val:
+    resize: [224, 224]
+
+# Normalization (ImageNet stats)
+normalize:
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
