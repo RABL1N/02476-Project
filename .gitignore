@@ -178,4 +178,7 @@ cython_debug/
 
 /data
 
+!/data/
+!/data/raw.dvc
+
 
