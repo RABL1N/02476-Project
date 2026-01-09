@@ -30,6 +30,7 @@ dependencies = [
     "tqdm>=4.65.0",
     "typer==0.15.1",
     "uvicorn==0.34.0",
+    "wandb>=0.16.0",
 ]
 
 [dependency-groups]

@@ -4,7 +4,9 @@ from pathlib import Path
 import hydra
 import torch
 import torch.nn as nn
-from omegaconf import DictConfig
+import wandb
+from hydra.utils import get_original_cwd
+from omegaconf import DictConfig, OmegaConf
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
@@ -22,9 +24,12 @@ def train(cfg: DictConfig) -> None:
     Args:
         cfg: Hydra configuration object
     """
-    # Extract configuration values
-    data_dir = Path(cfg.data_dir)
-    model_dir = Path(cfg.model_dir)
+    # Get original working directory (Hydra changes it to outputs/)
+    original_cwd = Path(get_original_cwd())
+    
+    # Extract configuration values and resolve relative to original cwd
+    data_dir = original_cwd / cfg.data_dir
+    model_dir = original_cwd / cfg.model_dir
     batch_size = cfg.batch_size
     num_epochs = cfg.num_epochs
     learning_rate = cfg.learning_rate
@@ -45,6 +50,18 @@ def train(cfg: DictConfig) -> None:
     log.info(f"  Learning rate: {learning_rate}")
     log.info(f"  Number of classes: {num_classes}")
     log.info(f"  Device: {device}")
+
+    # Initialize WandB
+    wandb_config = OmegaConf.to_container(cfg, resolve=True)
+    wandb.init(
+        project=cfg.wandb.project,
+        entity=cfg.wandb.entity if cfg.wandb.entity else None,
+        name=cfg.wandb.name if cfg.wandb.name else None,
+        tags=cfg.wandb.tags if cfg.wandb.tags else [],
+        notes=cfg.wandb.notes if cfg.wandb.notes else None,
+        config=wandb_config,
+    )
+    log.info(f"WandB initialized: {wandb.run.url}")
 
     # Create model directory
     model_dir.mkdir(parents=True, exist_ok=True)
@@ -84,6 +101,9 @@ def train(cfg: DictConfig) -> None:
     model = model.to(device)
     num_params = sum(p.numel() for p in model.parameters())
     log.info(f"Model has {num_params:,} parameters")
+    
+    # Log model architecture to WandB
+    wandb.config.update({"model_params": num_params})
 
     # Loss function and optimizer
     criterion = nn.CrossEntropyLoss()
@@ -153,6 +173,17 @@ def train(cfg: DictConfig) -> None:
         val_acc = 100 * val_correct / val_total
         avg_val_loss = val_loss / len(val_loader)
 
+        # Log metrics to WandB
+        wandb.log(
+            {
+                "epoch": epoch + 1,
+                "train/loss": avg_train_loss,
+                "train/accuracy": train_acc,
+                "val/loss": avg_val_loss,
+                "val/accuracy": val_acc,
+            }
+        )
+
         # Log progress
         log.info(
             f"Epoch [{epoch+1}/{num_epochs}] | "
@@ -166,9 +197,16 @@ def train(cfg: DictConfig) -> None:
             model_path = model_dir / "best_model.pt"
             torch.save(model.state_dict(), model_path)
             log.info(f"  -> Saved best model with validation accuracy: {val_acc:.2f}%")
+            
+            # Log best model to WandB
+            wandb.run.summary["best_val_accuracy"] = best_val_acc
+            wandb.run.summary["best_val_loss"] = avg_val_loss
 
     log.info(f"Training completed! Best validation accuracy: {best_val_acc:.2f}%")
     log.info(f"Best model saved to: {model_dir / 'best_model.pt'}")
+    
+    # Finish WandB run
+    wandb.finish()
 
 
 if __name__ == "__main__":
