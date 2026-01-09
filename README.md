@@ -1,6 +1,14 @@
 # mlops_project
 
-A short description of the project.
+### Overall goal of the project
+The goal of this project is to develop a machine learning model that can classify chest X ray images as either normal or showing signs of pneumonia. The main focus is on creating a reproducible and well structured machine learning workflow rather than achieving maximum performance.
+
+### Data description
+The dataset used in this project consists of chest X ray images from pediatric patients. The images are labeled as either normal or pneumonia. The dataset contains several thousand samples and is divided into training validation and test sets. Each sample is a grayscale image stored as an image file. The total dataset size is on the order of a few hundred megabytes. The data modality is image based and the task is binary classification.
+
+### Expected models
+The project will initially use a simple convolutional neural network for image classification. If time allows transfer learning with pretrained image classification models may be explored. The emphasis is on model training evaluation and reproducibility rather than model complexity.
+
 
 ## Project structure
 
