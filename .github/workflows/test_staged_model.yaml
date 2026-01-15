@@ -1,0 +1,34 @@
+jobs:
+  identify_event:
+    ...
+  test_model:
+    runs-on: ubuntu-latest
+    needs: identify_event
+    env:
+      WANDB_API_KEY: ${{ secrets.wandb_key }}
+      WANDB_ENTITY: mlops-group-85
+      WANDB_PROJECT: mlops-project
+      MODEL_NAME: ${{ needs.identify_event.outputs.model_name }}
+    steps:
+    - name: Echo model name
+      run: |
+        echo "Model name: $MODEL_NAME"
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Install uv
+      run: pip install uv
+
+    - name: Sync dependencies
+      run: uv sync
+
+    - name: List installed packages
+      run: uv pip list
+
+    - name: Test model
+      run: uv run pytest tests/performancetests/test_model.py
