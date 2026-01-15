@@ -209,6 +209,7 @@ def train(cfg: DictConfig) -> None:
         if epochs_since_improvement >= patience:
             log.info(f"Early stopping triggered after {patience} epochs without improvement.")
             break
+    
 
     log.info(f"Training completed! Best validation accuracy: {best_val_acc:.2f}%")
     log.info(f"Best model saved to: {model_dir / 'best_model.pt'}")
