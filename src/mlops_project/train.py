@@ -17,6 +17,8 @@ from mlops_project.model import Model
 log = logging.getLogger(__name__)
 
 
+
+
 @hydra.main(version_base=None, config_path="../../configs", config_name="config")
 def train(cfg: DictConfig) -> None:
     """Train the CNN model on the chest X-ray pneumonia dataset.
@@ -55,16 +57,18 @@ def train(cfg: DictConfig) -> None:
     log.info(f"  Device: {device}")
 
     # Initialize WandB
+    # Ensure entity is set to team (required for registry linking)
+    entity = cfg.wandb.entity if cfg.wandb.entity else "mlops-group-85"
     wandb_config = OmegaConf.to_container(cfg, resolve=True)
     wandb.init(
         project=cfg.wandb.project,
-        entity=cfg.wandb.entity if cfg.wandb.entity else None,
-        name=cfg.wandb.name if cfg.wandb.name else None,
-        tags=cfg.wandb.tags if cfg.wandb.tags else [],
-        notes=cfg.wandb.notes if cfg.wandb.notes else None,
+        entity=entity,
+        name=getattr(cfg.wandb, "name", None),
+        tags=getattr(cfg.wandb, "tags", []),
+        notes=getattr(cfg.wandb, "notes", None),
         config=wandb_config,
     )
-    log.info(f"WandB initialized: {wandb.run.url}")
+    log.info(f"WandB initialized: {wandb.run.url} (entity: {entity})")
 
     # Create model directory
     model_dir.mkdir(parents=True, exist_ok=True)
@@ -125,6 +129,7 @@ def train(cfg: DictConfig) -> None:
 
     # Training loop
     best_val_acc = 0.0
+    best_val_loss = float("inf")
     epochs_since_improvement = 0
     patience = getattr(cfg, "early_stopping_patience", 5)
 
@@ -210,11 +215,12 @@ def train(cfg: DictConfig) -> None:
         # Save best model and reset patience counter
         if val_acc > best_val_acc:
             best_val_acc = val_acc
+            best_val_loss = avg_val_loss
             model_path = model_dir / "best_model.pt"
             torch.save(model.state_dict(), model_path)
             log.info(f"  -> Saved best model with validation accuracy: {val_acc:.2f}%")
             wandb.run.summary["best_val_accuracy"] = best_val_acc
-            wandb.run.summary["best_val_loss"] = avg_val_loss
+            wandb.run.summary["best_val_loss"] = best_val_loss
             epochs_since_improvement = 0
         else:
             epochs_since_improvement += 1
@@ -233,15 +239,117 @@ def train(cfg: DictConfig) -> None:
         name="best_model",
         type="model",
         description="Best model based on validation accuracy",
-        metadata={"best_val_accuracy": best_val_acc}
+        metadata={"best_val_accuracy": best_val_acc, "best_val_loss": best_val_loss}
     )
     artifact.add_file(str(model_dir / "best_model.pt"))
-    logged_artifact = wandb.log_artifact(artifact)
-    log.info("Best model uploaded to WandB as an artifact.")
-    wandb.run.link_artifact(
-        artifact=logged_artifact,
-        target_path="wandb-registry-02476_registry/Models"
-    )
+    
+    # Get API instance and entity/project info for registry comparison
+    # Ensure API is initialized with the correct entity
+    entity = wandb.run.entity or "mlops-group-85"
+    project = wandb.run.project or "mlops-project"
+    
+    # Initialize API - ensure it uses the same authentication as the run
+    api = wandb.Api()
+    
+    # Determine if this model should get the "best" alias
+    # Compare against current "best" model using validation accuracy
+    should_be_best = False
+    
+    try:
+        # Try to get the current "best" model from project artifacts
+        try:
+            current_best = api.artifact(f"{entity}/{project}/best_model:best")
+            current_best_acc = current_best.metadata.get("best_val_accuracy", -1.0) if current_best.metadata else -1.0
+            
+            # Compare: higher validation accuracy is better
+            # If equal, also promote if validation loss is better (lower)
+            if best_val_acc > current_best_acc:
+                should_be_best = True
+                log.info(
+                    f"New model is better: validation accuracy {best_val_acc:.2f}% "
+                    f"(previous best: {current_best_acc:.2f}%)"
+                )
+            elif best_val_acc == current_best_acc:
+                # If accuracy is equal, check validation loss (lower is better)
+                current_best_loss = current_best.metadata.get("best_val_loss", float("inf")) if current_best.metadata else float("inf")
+                if best_val_loss < current_best_loss:
+                    should_be_best = True
+                    log.info(
+                        f"New model has same accuracy {best_val_acc:.2f}% but better loss "
+                        f"({best_val_loss:.4f} vs {current_best_loss:.4f}), promoting to 'best'"
+                    )
+                else:
+                    log.info(
+                        f"Current model accuracy {best_val_acc:.2f}% equals existing best "
+                        f"and loss is not better, keeping existing 'best' alias"
+                    )
+            else:
+                log.info(
+                    f"Current model accuracy {best_val_acc:.2f}% is not better than "
+                    f"existing best {current_best_acc:.2f}%, keeping existing 'best' alias"
+                )
+        except Exception as e:
+            # No existing "best" model - this is the first one
+            # Check if it's actually a "not found" error or something else
+            if "not found" in str(e).lower() or "does not exist" in str(e).lower():
+                should_be_best = True
+                log.info(f"No existing 'best' model found. This will be the first 'best' model.")
+            else:
+                # Some other error - log it but still try to set as best
+                log.warning(f"Error checking existing 'best' model: {e}. Assuming this is the first model.")
+                should_be_best = True
+    except Exception as e:
+        log.warning(f"Could not check existing 'best' model: {e}. Assuming this is the first model.")
+        should_be_best = True
+    
+    # Set aliases: always "latest", and "best" if this model is better
+    # W&B automatically handles alias "theft" - assigning "best" to new version removes it from old one
+    aliases = ["latest"]
+    if should_be_best:
+        aliases.append("best")
+    
+    # Log artifact with aliases
+    logged_artifact = wandb.log_artifact(artifact, aliases=aliases)
+    log.info(f"Model uploaded to WandB as an artifact with aliases: {aliases}")
+    
+    # Link to registry immediately after logging (before waiting)
+    # This ensures the run context is still active
+    registry_name = "02476_registry"
+    registry_path = f"wandb-registry-{registry_name}/Models"
+    
+    try:
+        # Try linking immediately while run is active
+        wandb.run.link_artifact(
+            artifact=logged_artifact,
+            target_path=registry_path
+        )
+        log.info(f"Artifact linked to registry: {registry_path} with aliases: {aliases}")
+    except Exception as e1:
+        # If immediate linking fails, wait for artifact to finalize and try API method
+        log.warning(f"Immediate linking failed: {e1}")
+        log.info("Waiting for artifact to finalize, then trying API method...")
+        logged_artifact.wait()
+        
+        try:
+            # Use API method after artifact is finalized
+            artifact_path = f"{entity}/{project}/{logged_artifact.name}:{logged_artifact.version}"
+            log.info(f"Attempting to link artifact via API: {artifact_path} to {registry_path}")
+            api_artifact = api.artifact(artifact_path)
+            api_artifact.link(target_path=registry_path)
+            log.info(f"Artifact linked to registry via API: {registry_path} with aliases: {aliases}")
+        except Exception as e2:
+            log.error(f"Failed to link artifact to registry: {e2}")
+            log.error(f"Error type: {type(e2).__name__}")
+            log.error(f"Error details: {str(e2)}")
+            log.info(f"Artifact is still available in project with aliases: {aliases}")
+            log.info(f"Artifact path: {artifact_path if 'artifact_path' in locals() else 'N/A'}")
+            log.info("")
+            log.info("TROUBLESHOOTING:")
+            log.info(f"1. Verify the registry '{registry_name}' exists and you have 'Member' or 'Admin' role")
+            log.info("2. Check registry permissions: https://wandb.ai/mlops-group-85/registries/02476_registry")
+            log.info("3. Ensure you're logged in: wandb login")
+            log.info("4. Verify entity matches: entity should be 'mlops-group-85'")
+            log.info("5. You can manually link artifacts in the WandB UI if needed")
 
     # Finish WandB run
     wandb.finish()
