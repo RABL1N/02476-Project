@@ -24,6 +24,12 @@ jobs:
       WANDB_ENTITY: mlops-group-85
       WANDB_PROJECT: mlops-project
       MODEL_NAME: ${{ needs.identify_event.outputs.model_name }}
+      EVENT_AUTHOR: ${{ needs.identify_event.outputs.event_author }}
+      ARTIFACT_VERSION: ${{ needs.identify_event.outputs.artifact_version }}
+      ARTIFACT_VERSION_STRING: ${{ needs.identify_event.outputs.artifact_version_string }}
+      ARTIFACT_COLLECTION_NAME: ${{ needs.identify_event.outputs.artifact_collection_name }}
+      PROJECT_NAME: ${{ needs.identify_event.outputs.project_name }}
+      ENTITY_NAME: ${{ needs.identify_event.outputs.entity_name }}
     steps:
     - name: Echo model name
       run: |
