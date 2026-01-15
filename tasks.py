@@ -12,10 +12,13 @@ def preprocess_data(ctx: Context) -> None:
     """Preprocess data."""
     ctx.run(f"uv run src/{PROJECT_NAME}/data.py data/raw data/processed", echo=True, pty=not WINDOWS)
 
-@task
-def train(ctx: Context) -> None:
-    """Train model."""
-    ctx.run(f"uv run src/{PROJECT_NAME}/train.py", echo=True, pty=not WINDOWS)
+@task(help={"fake_training": "Enable fast/fake training mode for CI or testing."})
+def train(ctx: Context, fake_training: bool = False) -> None:
+    """Train model. Use --fake-training to enable fast/fake mode."""
+    cmd = f"uv run src/{PROJECT_NAME}/train.py"
+    if fake_training:
+        cmd += " fake_training=true"
+    ctx.run(cmd, echo=True, pty=not WINDOWS)
 
 @task
 def test(ctx: Context) -> None:

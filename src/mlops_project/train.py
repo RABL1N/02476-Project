@@ -30,8 +30,11 @@ def train(cfg: DictConfig) -> None:
     # Extract configuration values and resolve relative to original cwd
     data_dir = original_cwd / cfg.data_dir
     model_dir = original_cwd / cfg.model_dir
+
+
     batch_size = cfg.batch_size
     num_epochs = cfg.num_epochs
+
     learning_rate = cfg.learning_rate
     num_classes = cfg.num_classes
 
@@ -89,6 +92,17 @@ def train(cfg: DictConfig) -> None:
     train_dataset = ChestXRayDataset(data_dir, split="train", transform=train_transform)
     val_dataset = ChestXRayDataset(data_dir, split="val", transform=val_transform)
 
+
+    # Override for fast/fake training
+    if getattr(cfg, "fake_training", False):
+        # Use only a few samples for speed
+        train_dataset.image_paths = train_dataset.image_paths[:4]
+        train_dataset.labels = train_dataset.labels[:4]
+        val_dataset.image_paths = val_dataset.image_paths[:2]
+        val_dataset.labels = val_dataset.labels[:2]
+        batch_size = 1 * len(train_dataset)
+        num_epochs = 1
+        log.info("FAKE TRAINING MODE: Using 4 train and 2 val samples, batch_size=4, num_epochs=1")
     # Create data loaders
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=0)

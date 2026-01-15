@@ -41,3 +41,4 @@ wandb:
   notes: "Baseline model for chest X-ray pneumonia classification"
 
 early_stopping_patience: 5
+fake_training: false
