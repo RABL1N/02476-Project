@@ -201,6 +201,15 @@ def train(cfg: DictConfig) -> None:
             # Log best model to WandB
             wandb.run.summary["best_val_accuracy"] = best_val_acc
             wandb.run.summary["best_val_loss"] = avg_val_loss
+            
+            # Upload model as WandB artifact
+            try:
+                artifact = wandb.Artifact("best_model", type="model")
+                artifact.add_file(str(model_path))
+                wandb.run.log_artifact(artifact)
+                log.info("Best model uploaded to WandB as an artifact.")
+            except Exception as e:
+                log.warning(f"Failed to upload model to WandB: {e}")
 
     log.info(f"Training completed! Best validation accuracy: {best_val_acc:.2f}%")
     log.info(f"Best model saved to: {model_dir / 'best_model.pt'}")
