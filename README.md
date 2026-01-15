@@ -135,3 +135,55 @@ The directory structure of the project looks like this:
 Created using [mlops_template](https://github.com/SkafteNicki/mlops_template),
 a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting
 started with Machine Learning Operations (MLOps).
+
+## GCP VM Setup and Syncing
+
+This project includes scripts to set up and sync the project with a Google Cloud Platform (GCP) VM instance for training.
+
+### Initial Setup
+
+1. **Set up the repository on the VM:**
+   ```bash
+   ./setup_vm_git.sh
+   ```
+   This script will:
+   - Install git on the VM (if needed)
+   - Clone the repository from GitHub to `~/mlops_project` on the VM
+   - Install `uv` package manager
+   - Configure PATH for `uv`
+
+2. **Authenticate with Google Cloud Storage:**
+   SSH into the VM and authenticate with your user credentials to access the DVC remote:
+   ```bash
+   gcloud compute ssh instance-20260113-110032 --zone=europe-west1-d
+   gcloud auth application-default login
+   ```
+   This is a one-time setup. Credentials will persist across sessions.
+
+3. **Install dependencies on the VM:**
+   ```bash
+   cd ~/mlops_project
+   export PATH="$HOME/.local/bin:$PATH"  # If not already in PATH
+   uv sync
+   ```
+
+### Syncing Changes
+
+After making changes locally and pushing to GitHub, sync the VM with:
+
+```bash
+./sync_vm.sh
+```
+
+This script will:
+- Pull the latest code changes from GitHub
+- Pull the latest data files using DVC from Google Cloud Storage
+
+**Note:** The sync script uses user credentials (Option 2) for GCS access. If you encounter authentication errors, re-authenticate on the VM with `gcloud auth application-default login`.
+
+### Scripts Overview
+
+- `setup_vm_git.sh` - Initial setup: clones repository, installs dependencies
+- `sync_vm.sh` - Regular syncing: pulls latest code and data from GitHub and GCS
+
+Both scripts are designed to be run from your **local terminal** and will remotely execute commands on the VM via SSH.
