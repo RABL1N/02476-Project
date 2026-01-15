@@ -26,6 +26,7 @@ dependencies = [
     "kagglehub>=0.2.0",
     "pathspec<1",
     "pillow>=10.0.0",
+    "python-multipart>=0.0.21",
     "torch==2.6.0",
     "torchvision>=0.19.0",
     "tqdm>=4.65.0",
