@@ -311,7 +311,11 @@ class TestModelSavingDuringTraining:
         optimizer.step()
         
         # Save model
-        torch.save(model.state_dict(), save_path)
+        torch.save(
+            model.state_dict(),
+            save_path,
+            _use_new_zipfile_serialization=False
+        )
         
         # Load into new model
         new_model = Model(num_classes=2)

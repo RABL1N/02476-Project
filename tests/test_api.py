@@ -1,10 +1,33 @@
+import io
 from fastapi.testclient import TestClient
 from PIL import Image
-import io
+import torch
+import pytest
 
-from mlops_project.api import app
+import mlops_project.api as api
 
-client = TestClient(app)
+
+@pytest.fixture(autouse=True)
+def mock_model(monkeypatch):
+    """
+    Replace the real model with a lightweight dummy model
+    so tests do not depend on WandB or downloaded weights.
+    """
+
+    class DummyModel(torch.nn.Module):
+        def forward(self, x):
+            # Return fixed logits for 2 classes
+            batch_size = x.shape[0]
+            return torch.tensor([[0.1, 0.9]] * batch_size)
+
+    dummy_model = DummyModel()
+    dummy_model.eval()
+
+    monkeypatch.setattr(api, "_model", dummy_model)
+    yield
+
+
+client = TestClient(api.app)
 
 
 def test_health_endpoint():

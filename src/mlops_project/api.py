@@ -1,70 +1,80 @@
-from fastapi import FastAPI, UploadFile, File
-from PIL import Image
-import torch
-from torchvision import transforms
 from pathlib import Path
+import io
+
+import torch
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from PIL import Image
+from torchvision import transforms
 
 from mlops_project.model import Model
 
-# -------------------------
-# App setup
-# -------------------------
-app = FastAPI(title="Pneumonia Inference API")
+app = FastAPI()
 
-# -------------------------
-# Model loading
-# -------------------------
+# Configuration
 MODEL_PATH = Path("models/best_model.pt")
+DEVICE = "cpu"
 
-if not MODEL_PATH.exists():
-    raise RuntimeError(f"Model file not found at {MODEL_PATH}")
+# Global model cache (lazy-loaded)
+_model = None
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
 
-model = Model(num_classes=2)
-model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
-model.to(device)
-model.eval()
+def load_model() -> Model:
+    """
+    Lazily load the model.
+    This function is ONLY called when /predict is hit.
+    """
+    global _model
 
-# Class mapping
-CLASS_NAMES = ["NORMAL", "PNEUMONIA"]
+    if _model is not None:
+        return _model
 
-# -------------------------
-# Inference transforms
-# -------------------------
-inference_transform = transforms.Compose(
+    if not MODEL_PATH.exists():
+        raise RuntimeError(f"Model file not found at {MODEL_PATH}")
+
+    model = Model()
+    model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
+    model.eval()
+
+    _model = model
+    return model
+
+
+# Image preprocessing (same as training)
+preprocess = transforms.Compose(
     [
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225],
-        ),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                             std=[0.229, 0.224, 0.225]),
     ]
 )
 
-# -------------------------
-# Endpoints
-# -------------------------
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
 
 @app.post("/predict")
-async def predict(file: UploadFile = File(...)):
-    # Load image
-    image = Image.open(file.file).convert("RGB")
+def predict(file: UploadFile = File(...)):
+    # Load model lazily
+    try:
+        model = load_model()
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-    # Preprocess
-    x = inference_transform(image).unsqueeze(0).to(device)
+    # Read and preprocess image
+    try:
+        image_bytes = file.file.read()
+        image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        x = preprocess(image).unsqueeze(0)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid image file")
 
-    # Inference
+    # Run inference
     with torch.no_grad():
-        logits = model(x)
-        pred_idx = torch.argmax(logits, dim=1).item()
+        outputs = model(x)
+        predicted_class = torch.argmax(outputs, dim=1).item()
 
-    return {
-        "prediction": CLASS_NAMES[pred_idx],
-        "class_index": pred_idx,
-    }
+    label_map = {0: "NORMAL", 1: "PNEUMONIA"}
+    return {"prediction": label_map[predicted_class]}
