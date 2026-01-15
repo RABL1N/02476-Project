@@ -111,6 +111,8 @@ def train(cfg: DictConfig) -> None:
 
     # Training loop
     best_val_acc = 0.0
+    epochs_since_improvement = 0
+    patience = getattr(cfg, "early_stopping_patience", 5)
 
     for epoch in range(num_epochs):
         # Training phase
@@ -191,20 +193,39 @@ def train(cfg: DictConfig) -> None:
             f"Val Loss: {avg_val_loss:.4f}, Val Acc: {val_acc:.2f}%"
         )
 
-        # Save best model
+        # Save best model and reset patience counter
         if val_acc > best_val_acc:
             best_val_acc = val_acc
             model_path = model_dir / "best_model.pt"
             torch.save(model.state_dict(), model_path)
             log.info(f"  -> Saved best model with validation accuracy: {val_acc:.2f}%")
-            
-            # Log best model to WandB
             wandb.run.summary["best_val_accuracy"] = best_val_acc
             wandb.run.summary["best_val_loss"] = avg_val_loss
+            epochs_since_improvement = 0
+        else:
+            epochs_since_improvement += 1
+
+        # Early stopping check
+        if epochs_since_improvement >= patience:
+            log.info(f"Early stopping triggered after {patience} epochs without improvement.")
+            break
 
     log.info(f"Training completed! Best validation accuracy: {best_val_acc:.2f}%")
     log.info(f"Best model saved to: {model_dir / 'best_model.pt'}")
-    
+
+    # Log best model as a wandb artifact
+    artifact = wandb.Artifact(
+        name="best_model",
+        type="model",
+        description="Best model based on validation accuracy",
+        metadata={"best_val_accuracy": best_val_acc}
+    )
+    artifact.add_file(str(model_dir / "best_model.pt"))
+    wandb.log_artifact(artifact)
+    log.info("Best model uploaded to WandB as an artifact.")
+    wandb.run.link_artifact(artifact, f"wandb-registry-02476_registry/Models")
+
+
     # Finish WandB run
     wandb.finish()
 

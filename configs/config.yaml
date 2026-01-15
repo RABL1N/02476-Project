@@ -9,7 +9,7 @@ model_dir: models
 
 # Training hyperparameters
 batch_size: 32
-num_epochs: 10
+num_epochs: 3
 learning_rate: 0.001
 
 # Device (null = auto-detect)
@@ -36,6 +36,8 @@ normalize:
 wandb:
   project: mlops-project
   entity: mlops-group-85
-  name: baseline-model
+  name: baseline-model-3-Epochs
   tags: [baseline, model]
   notes: "Baseline model for chest X-ray pneumonia classification"
+
+early_stopping_patience: 5
