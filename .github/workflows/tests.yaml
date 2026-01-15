@@ -12,9 +12,17 @@ jobs:
   test:
     runs-on: ${{ matrix.operating-system }}
     strategy:
+      fail-fast: false
       matrix:
         operating-system: ["ubuntu-latest", "windows-latest", "macos-latest"]
         python-version: ["3.12", "3.11"]
+        pytorch-version: ["2.6.0", "2.5.0"]
+        exclude:
+          # Reduce matrix size by excluding some combinations
+          - operating-system: "windows-latest"
+            pytorch-version: "2.5.0"
+          - operating-system: "macos-latest"
+            pytorch-version: "2.5.0"
 
     steps:
       - name: Checkout code
@@ -25,6 +33,15 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            uv-${{ runner.os }}-${{ matrix.python-version }}-
+            uv-${{ runner.os }}-
+
       - name: Install uv
         uses: astral-sh/setup-uv@v4
         with:
@@ -33,17 +50,19 @@ jobs:
       - name: Install dependencies
         run: |
           uv sync --dev
+          uv pip install torch==${{ matrix.pytorch-version }} torchvision --index-url https://download.pytorch.org/whl/cpu
           uv pip list
 
       - name: Run tests & coverage
         run: |
-          uv run coverage run --source=src/mlops_project -m pytest tests/
+          uv run coverage run --source=src/mlops_project -m pytest tests/ -v
           uv run coverage report -m
           uv run coverage xml
 
       - name: Upload coverage to Codecov
-        if: matrix.operating-system == 'ubuntu-latest' && matrix.python-version == '3.12'
+        if: matrix.operating-system == 'ubuntu-latest' && matrix.python-version == '3.12' && matrix.pytorch-version == '2.6.0'
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage.xml
           fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
