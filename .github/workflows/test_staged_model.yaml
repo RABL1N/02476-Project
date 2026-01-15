@@ -1,6 +1,17 @@
 jobs:
   identify_event:
-    ...
+    runs-on: ubuntu-latest
+    outputs:
+      model_name: ${{ steps.set_output.outputs.model_name }}
+    steps:
+      - name: Echo event payload
+        run: |
+          echo "Event type: ${{ github.event.action }}"
+          echo "Payload: ${{ toJson(github.event.client_payload) }}"
+      - name: Set model_name output
+        id: set_output
+        run: |
+          echo "model_name=${{ github.event.client_payload.artifact_version_string }}" >> $GITHUB_OUTPUT
   test_model:
     runs-on: ubuntu-latest
     needs: identify_event
