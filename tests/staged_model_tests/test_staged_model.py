@@ -6,7 +6,7 @@ from src.mlops_project.model import Model as MyModel
 
 def load_model(artifact):
     api = wandb.Api(
-        api_key=os.getenv("wandb_key"),
+        api_key=os.getenv("WANDB_API_KEY"),
         overrides={"entity": os.getenv("WANDB_ENTITY"), "project": os.getenv("WANDB_PROJECT")},
     )
     logdir = "./artifacts"

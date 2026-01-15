@@ -54,4 +54,4 @@ jobs:
       run: uv pip list
 
     - name: Test model
-      run: uv run pytest tests/staged_model_test/test_staged_model.py
+      run: uv run pytest tests/staged_model_tests/test_staged_model.py
