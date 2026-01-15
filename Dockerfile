@@ -12,14 +12,34 @@ COPY pyproject.toml uv.lock ./
 
 RUN pip install --no-cache-dir uv
 
-# 🔽 ADD THIS LINE
 COPY README.md ./
 
 COPY src ./src
 
 RUN uv pip install --system --no-cache .
 
-COPY models ./models
+# Create models directory
+RUN mkdir -p models
+
+# Download model from WandB registry
+# Build args for WandB configuration
+ARG WANDB_API_KEY
+ARG WANDB_ENTITY=mlops-group-85
+ARG WANDB_PROJECT=mlops-project
+ARG WANDB_ARTIFACT=best_model:latest
+
+# Set environment variables for WandB
+ENV WANDB_API_KEY=${WANDB_API_KEY}
+ENV WANDB_ENTITY=${WANDB_ENTITY}
+ENV WANDB_PROJECT=${WANDB_PROJECT}
+ENV WANDB_ARTIFACT=${WANDB_ARTIFACT}
+
+# Copy download script
+COPY download_model.py ./
+
+# Download model from WandB using Python script
+# Note: wandb is already installed via uv pip install above
+RUN python3 download_model.py
 
 EXPOSE 8080
 
