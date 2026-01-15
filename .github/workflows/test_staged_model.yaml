@@ -1,3 +1,7 @@
+# Add event trigger for repository_dispatch
+on:
+  repository_dispatch:
+    types: [staged_model]
 jobs:
   identify_event:
     runs-on: ubuntu-latest
