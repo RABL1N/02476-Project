@@ -8,8 +8,8 @@ data_dir: data/raw/chest_xray
 model_dir: models
 
 # Training hyperparameters
-batch_size: 32
-num_epochs: 3
+batch_size: 64
+num_epochs: 1
 learning_rate: 0.001
 
 # Device (null = auto-detect)

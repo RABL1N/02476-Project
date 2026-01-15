@@ -221,10 +221,12 @@ def train(cfg: DictConfig) -> None:
         metadata={"best_val_accuracy": best_val_acc}
     )
     artifact.add_file(str(model_dir / "best_model.pt"))
-    wandb.log_artifact(artifact)
+    logged_artifact = wandb.log_artifact(artifact)
     log.info("Best model uploaded to WandB as an artifact.")
-    wandb.run.link_artifact(artifact, f"wandb-registry-02476_registry/Models")
-
+    wandb.run.link_artifact(
+        artifact=logged_artifact,
+        target_path="wandb-registry-02476_registry/Models"
+    )
 
     # Finish WandB run
     wandb.finish()
