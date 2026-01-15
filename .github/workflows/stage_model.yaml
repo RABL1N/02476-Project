@@ -2,4 +2,32 @@ name: Check staged model
 
 on:
   repository_dispatch:
-    types: staged_model
+    types: [staged_model]
+
+jobs:
+  identify_event:
+    runs-on: ubuntu-latest
+    outputs:
+      model_name: ${{ steps.set_output.outputs.model_name }}
+      event_author: ${{ steps.set_output.outputs.event_author }}
+      artifact_version: ${{ steps.set_output.outputs.artifact_version }}
+      artifact_version_string: ${{ steps.set_output.outputs.artifact_version_string }}
+      artifact_collection_name: ${{ steps.set_output.outputs.artifact_collection_name }}
+      project_name: ${{ steps.set_output.outputs.project_name }}
+      entity_name: ${{ steps.set_output.outputs.entity_name }}
+    steps:
+      - name: Check event type
+        run: |
+          echo "Event type: repository_dispatch"
+          echo "Payload Data: ${{ toJson(github.event.client_payload) }}"
+
+      - name: Setting model environment variables and outputs
+        id: set_output
+        run: |
+          echo "model_name=${{ github.event.client_payload.artifact_version_string }}" >> $GITHUB_OUTPUT
+          echo "event_author=${{ github.event.client_payload.event_author }}" >> $GITHUB_OUTPUT
+          echo "artifact_version=${{ github.event.client_payload.artifact_version }}" >> $GITHUB_OUTPUT
+          echo "artifact_version_string=${{ github.event.client_payload.artifact_version_string }}" >> $GITHUB_OUTPUT
+          echo "artifact_collection_name=${{ github.event.client_payload.artifact_collection_name }}" >> $GITHUB_OUTPUT
+          echo "project_name=${{ github.event.client_payload.project_name }}" >> $GITHUB_OUTPUT
+          echo "entity_name=${{ github.event.client_payload.entity_name }}" >> $GITHUB_OUTPUT

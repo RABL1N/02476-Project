@@ -34,6 +34,20 @@ class Model(nn.Module):
 
         # Activation function
         self.relu = nn.ReLU()
+    
+    def load_from_checkpoint(cls, checkpoint_path: str) -> "Model":
+        """Load model from a checkpoint file.
+
+        Args:
+            checkpoint_path: Path to the checkpoint file.
+        Returns:
+            Loaded Model instance.
+        """
+        checkpoint = torch.load(checkpoint_path, map_location=torch.device('cpu'))
+        model = cls(num_classes=checkpoint['num_classes'])
+        model.load_state_dict(checkpoint['model_state_dict'])
+        model.eval()
+        return model
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass through the network.
