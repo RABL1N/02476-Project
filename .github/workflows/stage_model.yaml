@@ -1,4 +1,4 @@
-name: Check staged model
+name: Check newly staged model
 
 on:
   repository_dispatch:
