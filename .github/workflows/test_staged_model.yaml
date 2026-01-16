@@ -23,7 +23,7 @@ jobs:
     needs: identify_event
     env:
       PYTHONPATH: .
-      WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
+      WANDB_API_KEY: ${{ secrets.wandb_key }}
       WANDB_ENTITY: mlops-group-85
       WANDB_PROJECT: mlops-project
       MODEL_NAME: ${{ needs.identify_event.outputs.model_name }}
