@@ -305,3 +305,14 @@ The `/model/info` endpoint confirms which model is loaded. Look for the `wandb_a
 ```
 
 This confirms the container is using the model with the "best" alias from WandB, which has the highest validation accuracy among all trained models.
+
+### Automated testing of staged models
+When you train a model using:
+
+```bash
+uv run invoke train
+```
+
+The trained model is automatically saved as an artifact on Weights & Biases (WandB). This triggers a webhook to GitHub, which starts a container that runs automated tests on the model. These tests are defined in [staged_model_tests/test_staged_model.py](staged_model_tests/test_staged_model.py).
+
+This workflow ensures that every staged model is validated with a suite of checks before being promoted or used in production.
