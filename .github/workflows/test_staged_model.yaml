@@ -54,5 +54,15 @@ jobs:
     - name: List installed packages
       run: uv pip list
 
+
+    - name: Check WANDB_API_KEY
+      run: |
+        if [ -z "$WANDB_API_KEY" ]; then
+          echo "WANDB_API_KEY is NOT set!"
+          exit 1
+        else
+          echo "WANDB_API_KEY is set."
+        fi
+
     - name: Test model
       run: uv run pytest staged_model_tests/test_staged_model.py

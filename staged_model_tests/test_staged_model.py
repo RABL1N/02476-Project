@@ -8,15 +8,21 @@ import torch
 from src.mlops_project.model import Model as MyModel
 
 def load_model(artifact):
-    api = wandb.Api(
-        api_key=os.getenv("WANDB_API_KEY"),
-        overrides={"entity": os.getenv("WANDB_ENTITY"), "project": os.getenv("WANDB_PROJECT")},
-    )
+    api_key = os.getenv("WANDB_API_KEY")
+    print(api_key)
+    if not api_key:
+        raise RuntimeError("WANDB_API_KEY environment variable is not set. Please set it before running the test.")
+    entity = os.getenv("WANDB_ENTITY")
+    project = os.getenv("WANDB_PROJECT")
+    if not entity or not project:
+        raise RuntimeError("WANDB_ENTITY and WANDB_PROJECT environment variables must be set.")
+
+    api = wandb.Api(api_key=api_key, overrides={"entity": entity, "project": project})
     logdir = "./artifacts"
-    
-    artifact = api.artifact(artifact)
-    artifact.download(root=logdir)
-    file_name = artifact.files()[0].name
+
+    artifact_obj = api.artifact(artifact)
+    artifact_obj.download(root=logdir)
+    file_name = artifact_obj.files()[0].name
     # Standard PyTorch loading pattern
     # You may need to adjust num_classes if your model was saved with a different value
     model = MyModel(num_classes=2)

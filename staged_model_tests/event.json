@@ -1,0 +1,11 @@
+{
+    "event_type": "staged_model",
+    "client_payload": {
+        "event_author": "lauge",
+        "artifact_version": "v3",
+        "artifact_version_string": "best_model:v3",
+        "artifact_collection_name": "best_model",
+        "project_name": "mlops-project",
+        "entity_name": "mlops-group-85"
+    }
+}
