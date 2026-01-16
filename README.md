@@ -187,3 +187,121 @@ This script will:
 - `sync_vm.sh` - Regular syncing: pulls latest code and data from GitHub and GCS
 
 Both scripts are designed to be run from your **local terminal** and will remotely execute commands on the VM via SSH.
+
+## Docker Deployment
+
+The project includes a Docker setup for deploying the inference API. The Docker image automatically downloads the best model from WandB during the build process.
+
+### How It Works
+
+The Dockerfile (`Dockerfile` in the project root) is configured to:
+1. Install all project dependencies
+2. Download the model with the "best" alias from WandB (`best_model:best`)
+3. Save the model to `models/best_model.pt` inside the container
+4. Start the FastAPI inference server on port 8080
+
+The model is downloaded from WandB artifacts during the Docker build, ensuring the container always uses the best-performing model based on validation accuracy.
+
+### Building the Docker Image
+
+To build the Docker image, you need to provide your WandB API key:
+
+```bash
+docker build -t pneumonia-api:latest \
+  --build-arg WANDB_API_KEY=your_wandb_api_key_here \
+  -f Dockerfile .
+```
+
+To get your WandB API key:
+- Visit: https://wandb.ai/authorize
+- Or check your WandB settings
+
+**Note:** The Docker image tag (`:latest`, `:best`, etc.) is just a label and doesn't affect which model is downloaded. The Dockerfile always downloads `best_model:best` from WandB regardless of the tag name.
+
+### Running the Container
+
+Start the container:
+
+```bash
+docker run -d -p 8080:8080 --name pneumonia-api pneumonia-api:latest
+```
+
+- `-d`: Run in detached mode (background)
+- `-p 8080:8080`: Map port 8080 from container to host
+- `--name pneumonia-api`: Name for the container
+
+### Checking Container Status
+
+```bash
+# Check if container is running
+docker ps
+
+# View container logs
+docker logs pneumonia-api
+
+# Stop the container
+docker stop pneumonia-api
+
+# Remove the container (after stopping)
+docker rm pneumonia-api
+```
+
+### Running Inference
+
+Once the container is running, you can make predictions:
+
+**1. Check API health:**
+```bash
+curl http://localhost:8080/health
+```
+
+**2. Check which model is being used:**
+```bash
+curl http://localhost:8080/model/info | python -m json.tool
+```
+
+This endpoint shows:
+- Model path and size
+- WandB artifact information (name, version, validation accuracy, loss)
+- Model architecture details
+
+**3. Make a prediction:**
+```bash
+curl -X POST "http://localhost:8080/predict" \
+  -H "accept: application/json" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@path/to/your/image.jpeg"
+```
+
+Example with a test image:
+```bash
+curl -X POST "http://localhost:8080/predict" \
+  -H "accept: application/json" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@data/raw/chest_xray/test/NORMAL/IM-0031-0001.jpeg"
+```
+
+The response will be:
+```json
+{
+  "prediction": "NORMAL",
+  "class_index": 0
+}
+```
+
+### Verifying the Best Model
+
+The `/model/info` endpoint confirms which model is loaded. Look for the `wandb_artifact` section in the response:
+
+```json
+{
+  "wandb_artifact": {
+    "name": "best_model:best",
+    "version": "v0",
+    "validation_accuracy": 81.25,
+    "best_val_loss": 0.23879611492156985
+  }
+}
+```
+
+This confirms the container is using the model with the "best" alias from WandB, which has the highest validation accuracy among all trained models.

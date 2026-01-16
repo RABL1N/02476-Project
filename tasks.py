@@ -27,6 +27,36 @@ def test(ctx: Context) -> None:
     ctx.run("uv run coverage report -m -i", echo=True, pty=not WINDOWS)
 
 @task
+def download_model(ctx: Context, artifact: str = "best_model:best") -> None:
+    """Download the best model from WandB for local inference."""
+    import os
+    from pathlib import Path
+    
+    # Ensure models directory exists
+    Path("models").mkdir(exist_ok=True)
+    
+    # Set environment variables if not already set
+    env_vars = {}
+    if not os.environ.get("WANDB_API_KEY"):
+        print("Warning: WANDB_API_KEY not set. Make sure you're logged in with 'wandb login'")
+    
+    ctx.run(
+        f"uv run python download_model.py",
+        echo=True,
+        pty=not WINDOWS,
+        env={"WANDB_ARTIFACT": artifact, **env_vars}
+    )
+
+@task
+def delete_artifacts(ctx: Context) -> None:
+    """Delete all versions of best_model artifact from WandB (requires confirmation)."""
+    ctx.run(
+        "uv run python delete_artifacts.py",
+        echo=True,
+        pty=not WINDOWS
+    )
+
+@task
 def docker_build(ctx: Context, progress: str = "plain") -> None:
     """Build docker images."""
     ctx.run(

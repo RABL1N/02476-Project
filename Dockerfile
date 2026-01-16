@@ -26,7 +26,7 @@ RUN mkdir -p models
 ARG WANDB_API_KEY
 ARG WANDB_ENTITY=mlops-group-85
 ARG WANDB_PROJECT=mlops-project
-ARG WANDB_ARTIFACT=best_model:latest
+ARG WANDB_ARTIFACT=best_model:best
 
 # Set environment variables for WandB
 ENV WANDB_API_KEY=${WANDB_API_KEY}
