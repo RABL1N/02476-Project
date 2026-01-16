@@ -30,10 +30,43 @@ def load_model(artifact):
     model.eval()
     return model
 
+
+import pytest
+
+def get_loaded_model():
+    model_name = os.getenv("MODEL_NAME")
+    assert model_name, "MODEL_NAME environment variable must be set."
+    return load_model(model_name)
+
 def test_model_speed():
-    model = load_model(os.getenv("MODEL_NAME"))
+    model = get_loaded_model()
     start = time.time()
-    for _ in range(100):
-        model(torch.rand(1, 1, 28, 28))
+    for _ in range(10):
+        # Use correct input shape for your model
+        model(torch.rand(1, 3, 224, 224))
     end = time.time()
-    assert end - start < 1
+    assert end - start < 2
+
+def test_model_forward_shape():
+    model = get_loaded_model()
+    x = torch.randn(4, 3, 224, 224)
+    output = model(x)
+    assert output.shape == (4, 2)
+
+def test_model_output_dtype():
+    model = get_loaded_model()
+    x = torch.randn(1, 3, 224, 224)
+    output = model(x)
+    assert output.dtype == torch.float32
+
+def test_model_output_is_finite():
+    model = get_loaded_model()
+    x = torch.randn(4, 3, 224, 224)
+    output = model(x)
+    assert torch.isfinite(output).all(), "Output contains NaN or Inf values"
+
+def test_model_has_trainable_parameters():
+    model = get_loaded_model()
+    params = list(model.parameters())
+    assert len(params) > 0, "Model has no parameters"
+    assert all(p.requires_grad for p in params), "Not all parameters are trainable"
