@@ -620,7 +620,14 @@ In total we ended up using 228.37 danish crowns (DKK). The largest factor came f
 >
 > Answer:
 
---- question 29 fill here ---
+![Overview of the MLOps architecture](figures/Architecture Diagram.png)
+The figure illustrates the overall architecture of our machine learning system and the services used throughout the MLOps lifecycle. The starting point of the diagram is the local development setup, where we develop the code and configurations for data processing, model training, and deployment. Dependency management is handled consistently across environments to ensure reproducibility. When changes are committed and pushed to the GitHub repository, this automatically triggers continuous integration workflows using GitHub Actions.
+
+GitHub Actions is responsible for running unit tests, linting, and validation steps to ensure code quality. In parallel, data is versioned using DVC, with datasets stored remotely in a Google Cloud Storage (GCS) bucket. This allows the exact dataset versions used for training to be reproduced across different machines and environments.
+
+For training, the versioned data is pulled from GCS to a Google Cloud Compute Engine virtual machine, where the model is trained. During training, metrics, logs, and artifacts are tracked using Weights & Biases (W&B). Trained models are stored in the W&B model registry, providing traceability and versioning of model artifacts. Changes to the model registry can trigger additional validation steps, such as staged model tests, to ensure model quality before deployment.
+
+Once a model has passed validation, it is packaged into a Docker image together with a FastAPI-based inference service. This container is deployed to Google Cloud, where it runs as a scalable backend service. End users interact with the deployed system by sending HTTP requests to the FastAPI endpoint to obtain predictions. Overall, the architecture integrates data versioning, continuous integration, cloud-based training, model management, containerization, and deployment into a single coherent and reproducible MLOps pipeline.
 
 ### Question 30
 
