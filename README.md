@@ -51,7 +51,7 @@ The project will initially use a simple convolutional neural network for image c
 * [X] Get some continuous integration running on the GitHub repository (M17)
 * [X] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
 * [X] Add a linting step to your continuous integration (M17)
-* [ ] Add pre-commit hooks to your version control setup (M18)
+* [X] Add pre-commit hooks to your version control setup (M18)
 * [ ] Add a continues workflow that triggers when data changes (M19)
 * [X] Add a continues workflow that triggers when changes to the model registry is made (M19)
 * [X] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
