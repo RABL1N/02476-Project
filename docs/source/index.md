@@ -34,6 +34,14 @@ uv run python main.py train
 ```bash
 uv run python main.py test
 ```
+
+## Pytorch Lightning
+
+We have made a seperate script which utilizes pytorch lightning. To run this run
+```bash
+uv run invoke lightning-train
+```
+
 ## Architecture Overview
 
 The following diagram illustrates the overall MLOps pipeline implemented in this project,
