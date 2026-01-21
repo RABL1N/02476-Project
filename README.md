@@ -30,21 +30,8 @@ The checklist is *exhaustive* which means that it includes everything that you c
 * [X] Do a bit of code typing and remember to document essential parts of your code (M7)
 * [X] Setup version control for your data or part of your data (M8)
 * [X] Add command line interfaces and project commands to your code where it makes sense (M9)
-  <<<<<<< HEAD
 * [X] Construct one or multiple docker files for your code (M10)
 * [X] Build the docker files locally and make sure they work as intended (M10)
-  ========================================================================
-* [X] Construct one or multiple docker files for your code (M10)
-* [X] Build the docker files locally and make sure they work as intended (M10)
-
->>>>>>> 9a417ed (updated readme)
->>>>>>>
->>>>>>
->>>>>
->>>>
->>>
->>
-
 * [X] Write one or multiple configurations files for your experiments (M11)
 * [X] Used Hydra to load the configurations and manage your hyperparameters (M11)
 * [ ] Use profiling to optimize your code (M12)
