@@ -27,9 +27,10 @@ ENV WANDB_API_KEY=${WANDB_API_KEY}
 ENV WANDB_ENTITY=${WANDB_ENTITY}
 ENV WANDB_PROJECT=${WANDB_PROJECT}
 ENV WANDB_ARTIFACT=${WANDB_ARTIFACT}
+ENV PYTHONPATH=/app/src
 
 RUN python download_model.py
 
 EXPOSE 8080
 
-CMD ["uvicorn", "mlops_project.api:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["sh", "-c", "uvicorn src.mlops_project.api:app --host 0.0.0.0 --port ${PORT:-8080}"]

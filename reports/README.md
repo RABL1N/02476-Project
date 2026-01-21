@@ -147,8 +147,10 @@ s234835, s215207, s215115, s257188
 > *package to do ... and ... in our project*.
 >
 > Answer:
+> 
+Throughout the project we used a combination of open-source frameworks aligned with the DTU MLOps curriculum and applied them in practice to build a complete workflow. For data versioning, we used DVC together with a Google Cloud Storage remote, enabling reproducible dataset management beyond local files. Weights & Biases (wandb) was used for experiment tracking and model management, including logging metrics and managing model artifacts.
 
---- question 3 fill here ---
+The inference service was implemented using FastAPI, allowing us to expose model prediction endpoints for cloud deployment. To evaluate system performance under load, we used Locust to simulate concurrent users and stress-test the deployed API. Dependency management was handled using uv, which ensured consistent environments across local development, CI pipelines, and cloud machines by locking exact dependency versions. Together, these tools enabled an end-to-end MLOps pipeline covering data versioning, training, CI/CD, and deployment.
 
 ## Coding environment
 
@@ -170,7 +172,8 @@ s234835, s215207, s215115, s257188
 
 We managed dependencies in this project using the uv package manager. All project dependencies are declared in the pyproject.toml file, which serves as the single source of truth for required packages. Exact, pinned dependency versions are stored in the automatically generated uv.lock file. This ensures that the same dependency versions are installed across different machines, operating systems, and environments.
 
-To obtain an exact copy of the development environment, a new team member would first need to clone the GitHub repository, then install uv and ensure it is available in their system path. From the project root, running uv sync will create a virtual environment and install all dependencies exactly as specified in uv.lock. This guarantees full reproducibility of the Python environment without manual version management.
+To obtain an exact copy of the development environment, a new team member would first need to clone the GitHub repository, then install uv and ensure it is available in their system path. From the project root, running uv sync will create a virtual environment and install all dependencies exactly as specified in uv.lock. The same setup is used in continuous integration workflows and cloud training environments, ensuring full reproducibility across local development, CI, and deployment.
+
 ### Question 5
 
 > **We expect that you initialized your project using the cookiecutter template. Explain the overall structure of your**
@@ -185,11 +188,11 @@ To obtain an exact copy of the development environment, a new team member would 
 >
 > Answer:
 
-The project was initialized using the provided cookiecutter MLOps template, which we followed closely and filled out the core components required for a full MLOps workflow. The src/mlops_project directory contains the main application logic, including data handling, model definition, training, evaluation, and the FastAPI inference API. The tests directory was populated with unit tests for data processing, model construction, and training logic, following the structure suggested by the template.
+The project was initialized using the provided cookiecutter MLOps template, which we followed closely and filled out the core components required for a complete MLOps workflow. The src/mlops_project directory contains the main application logic, including data handling, model definition, training, evaluation, and the FastAPI inference API. The tests directory was populated with unit tests for data processing, model construction, and training logic, following the structure suggested by the template.
 
-Configuration files were placed in the configs directory and managed using Hydra to enable reproducible and configurable experiments. The data directory was used in combination with DVC to track and version datasets stored remotely in a Google Cloud Storage bucket. CI workflows were implemented under .github/workflows, extending the template with additional pipelines for linting, staged model testing, and data-change triggers.
+Configuration files were placed in the configs directory and managed using Hydra to support reproducible and configurable training experiments. The data directory was used together with DVC to track and version datasets stored remotely in a Google Cloud Storage bucket. Continuous integration workflows were implemented under .github/workflows, extending the template with additional pipelines for linting, data-change triggers, and staged model testing based on model registry updates.
 
-We made a few deviations from the original template by adding a frontend directory for a Streamlit application, a load_tests directory for Locust-based load testing, and additional Dockerfiles to support training and deployment.
+We deviated slightly from the original template by adding a frontend directory for a Streamlit application, a load_tests directory for Locust-based load testing, and additional Dockerfiles to support both training and deployment.
 
 ### Question 6
 
@@ -604,12 +607,12 @@ Training was triggered manually after syncing the repository and data to the VM 
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
-s234835 contributed mainly to improving documentation, the command-line interface, and pre-commit/config updates. They authored commits for revising the README with detailed project answers and status updates, adding the architecture diagram and flowchart enhancements, writing application usage documentation, and marking completion of workflow checklist items such as pre-commit hooks and CI workflow on data changes. 
+The-Laug (sXXXXXX) - Focused on core code development, refactoring, and training improvements. Their commits include adding PyTorch Lightning support and distributed data loading, work on staged model tests and CI integration, initial setup of model and training code, and other backend structural changes. This includes maintaining the model training logic and test setups that underpin correct automated workflows.
 
-The-Laug (sXXXXXX) focused on core code development, refactoring, and training improvements. Their commits include adding PyTorch Lightning support and distributed data loading, work on staged model tests and CI integration, initial setup of model and training code, and other backend structural changes. This includes maintaining the model training logic and test setups that underpin correct automated workflows.
+AFugl (sXXXXXX) - Focused on API functionality, DevOps, and CI/CD infrastructure. Their commits include backend Docker work, adding and fixing API endpoints, load testing configuration, merging branches related to fastapi inference, updating checklist statuses, and tests to make api.py and CI tests work correctly. They also worked on GCP VM sync scripts and data versioning with DVC and GCS.
 
-AFugl (sXXXXXX) focused on API functionality, DevOps, and CI/CD infrastructure. Their commits include backend Docker work, adding and fixing API endpoints, load testing configuration, merging branches related to fastapi inference, updating checklist statuses, and tests to make api.py and CI tests work correctly. They also worked on GCP VM sync scripts and data versioning with DVC and GCS.
+s234835 - Contributed to project integration, usability, and system-level design. They implemented and refined a command-line interface for core workflows such as data downloading, training, and testing, ensuring consistent usage across local, CI, and cloud environments. They configured and debugged pre-commit hooks and GitHub Actions workflows, including linting, data-change triggers, and staged model validation. They also assisted with cloud deployment, designed and documented the overall MLOps architecture diagram, and contributed to the README and overall project documentation.
 
-RABL1N (sXXXXXX) contributed across multiple areas including foundational setup, initial model commits, training logic additions, DVC and GCS integration, WandB logging and model registry integration, and broader cloud deployment documentation. They also updated tests and fixed various configuration and GitHub Pages documentation issues.
+RABL1N (sXXXXXX) - Contributed across multiple areas including foundational setup, initial model commits, training logic additions, DVC and GCS integration, WandB logging and model registry integration, and broader cloud deployment documentation. They also updated tests and fixed various configuration and GitHub Pages documentation issues.
 
 All members actively participated in code reviews, task coordination, debugging, and development decisions throughout the project. Generative AI tools such as ChatGPT were used to clarify concepts, write and debug code, and help generate documentation text, and GitHub Copilot was used to assist with writing and completing code segments.
