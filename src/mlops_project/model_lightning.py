@@ -44,13 +44,8 @@ class LitModel(LightningModule):
 
         # Activation function
         self.relu = nn.ReLU()
-<<<<<<< HEAD:src/mlops_project/model.py
-
-    def load_from_checkpoint(cls, checkpoint_path: str) -> "Model":
-=======
     
     def load_from_checkpoint(cls, checkpoint_path: str) -> "LitModel":
->>>>>>> scalable_apps:src/mlops_project/model_lightning.py
         """Load model from a checkpoint file.
 
         Args:
