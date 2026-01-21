@@ -1,0 +1,23 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    id: "Build backend image"
+    args:
+      [
+        "build",
+        "-t",
+        "europe-west1-docker.pkg.dev/$PROJECT_ID/mlops/mlops-backend:latest",
+        "-f",
+        "backend/Dockerfile",
+        "."
+      ]
+
+  - name: "gcr.io/cloud-builders/docker"
+    id: "Push backend image"
+    args:
+      [
+        "push",
+        "europe-west1-docker.pkg.dev/$PROJECT_ID/mlops/mlops-backend:latest"
+      ]
+
+options:
+  logging: CLOUD_LOGGING_ONLY
