@@ -86,6 +86,34 @@ def docker_build(ctx: Context, progress: str = "plain") -> None:
     )
 
 
+# Drift detection commands
+@task
+def extract_drift_features(ctx: Context) -> None:
+    """Extract features from datasets for drift detection."""
+    ctx.run(
+        f"uv run python -m {PROJECT_NAME}.monitoring.extract_features",
+        echo=True,
+        pty=not WINDOWS,
+    )
+
+
+@task
+def check_drift(ctx: Context) -> None:
+    """Run drift analysis and generate HTML report."""
+    ctx.run(
+        f"uv run python -m {PROJECT_NAME}.monitoring.drift_analysis",
+        echo=True,
+        pty=not WINDOWS,
+    )
+
+
+@task
+def drift(ctx: Context) -> None:
+    """Extract features and run drift analysis (full drift check)."""
+    extract_drift_features(ctx)
+    check_drift(ctx)
+
+
 # Documentation commands
 @task
 def build_docs(ctx: Context) -> None:
