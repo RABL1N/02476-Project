@@ -3,7 +3,7 @@
 This is the report template for the exam. Please only remove the text formatted as with three dashes in front and behind
 like:
 
-```--- question 1 fill here ---```
+``--- question 1 fill here ---``
 
 Where you instead should add your answers. Any other changes may have unwanted consequences when your report is
 auto-generated at the end of the course. For questions where you are asked to include images, start by adding the image
@@ -58,8 +58,8 @@ will check the repositories and the code to verify your answers.
 * [X] Create the initial file structure using cookiecutter with an appropriate template (M6)
 * [X] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
 * [X] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
-* [X] Remember to fill out the `requirements.txt` and `requirements_dev.txt` file with whatever dependencies that you
-  are using (M2+M6)
+* [X] Remember to either fill out the `requirements.txt`/`requirements_dev.txt` files or keeping your
+  `pyproject.toml`/`uv.lock` up-to-date with whatever dependencies that you are using (M2+M6)
 * [X] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
 * [X] Do a bit of code typing and remember to document essential parts of your code (M7)
 * [X] Setup version control for your data or part of your data (M8)
@@ -118,6 +118,7 @@ will check the repositories and the code to verify your answers.
 ## Group information
 
 ### Question 1
+
 > **Enter the group number you signed up on <learn.inside.dtu.dk>**
 >
 > Answer:
@@ -125,6 +126,7 @@ will check the repositories and the code to verify your answers.
 85
 
 ### Question 2
+
 > **Enter the study number for each member in the group**
 >
 > Example:
@@ -136,6 +138,7 @@ will check the repositories and the code to verify your answers.
 s234835, s215207, s215115, s257188
 
 ### Question 3
+
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
 > **which did you use and how did they help you complete the project?**
 >
@@ -146,7 +149,7 @@ s234835, s215207, s215115, s257188
 > *package to do ... and ... in our project*.
 >
 > Answer:
-> 
+
 Throughout the project we used a combination of open-source frameworks aligned with the DTU MLOps curriculum and applied them in practice to build a complete workflow. For data versioning, we used DVC together with a Google Cloud Storage remote, enabling reproducible dataset management beyond local files. Weights & Biases (wandb) was used for experiment tracking and model management, including logging metrics and managing model artifacts.
 
 The inference service was implemented using FastAPI, allowing us to expose model prediction endpoints for cloud deployment. To evaluate system performance under load, we used Locust to simulate concurrent users and stress-test the deployed API. Dependency management was handled using uv, which ensured consistent environments across local development, CI pipelines, and cloud machines by locking exact dependency versions. Together, these tools enabled an end-to-end MLOps pipeline covering data versioning, training, CI/CD, and deployment.
@@ -231,7 +234,6 @@ These concepts are important in larger projects because they help prevent superf
 We have implemented 77 pytest (uv run pytest --collect-only) style tests. Primarily we are testing our model, our training loop, our API, our dataloader/dataset and our staged models.
 We have chosen to test these, as they are some of the most crucial parts of our project. As stated above, we have created a github workflow to automatically run these tests, when we push to main.
 
-
 ### Question 8
 
 > **What is the total code coverage (in percentage) of your code? If your code had a code coverage of 100% (or close**
@@ -263,7 +265,8 @@ Even if we had 100% tests we would still not trust our code to be error free, as
 > Answer:
 
 --- question 9 fill here ---
-In our project we used branches a lot, but not pull requests, as we were a small group, so we mostly relied on real time communication in cases of code problems. Instead of having a branch for each person directly we mostly created branches for features or fixes that we wanted to implement, and then merged them into main when they were done. This helped us keep the main branch stable, as we could test the feature branches before merging them in. We used both git and github to manage our branches and used both the CLI for git and VSCode's git integration to manage our branches. 
+In our project we used branches a lot, but not pull requests, as we were a small group, so we mostly relied on real time communication in cases of code problems. Instead of having a branch for each person directly we mostly created branches for features or fixes that we wanted to implement, and then merged them into main when they were done. This helped us keep the main branch stable, as we could test the feature branches before merging them in. We used both git and github to manage our branches and used both the CLI for git and VSCode's git integration to manage our branches.
+
 ### Question 10
 
 > **Did you use DVC for managing data in your project? If yes, then how did it improve your project to have version**
@@ -292,14 +295,14 @@ This enabled us to be able to all use the same dataset state with 'dvc pull' com
 > Example:
 > *We have organized our continuous integration into 3 separate files: one for doing ..., one for running ... testing*
 > *and one for running ... . In particular for our ..., we used ... .An example of a triggered workflow can be seen*
-> *here: <weblink>*
+> *here: `<weblink>`*
 >
 > Answer:
 
 --- question 11 fill here ---
-For continious integration we have organized our workflows into a 6 separate files. 
-The first workflow (tests) is for testing our code, which includes running our unit tests and checking code coverage. This workflow tests multiple operating systems (Ubuntu and MacOS) and Python versions (3.12) to ensure compatibility across different environments. We also make use of caching for uv to speed up dependency installation. 
-The second workflow (stage_model and test_staged_model) is for testing newly staged models. This workflow is triggered by a repository dispatch event from WandB and tests the staged model using a separate test script. It also uses caching for uv and tests on Ubuntu. 
+For continious integration we have organized our workflows into a 6 separate files.
+The first workflow (tests) is for testing our code, which includes running our unit tests and checking code coverage. This workflow tests multiple operating systems (Ubuntu and MacOS) and Python versions (3.12) to ensure compatibility across different environments. We also make use of caching for uv to speed up dependency installation.
+The second workflow (stage_model and test_staged_model) is for testing newly staged models. This workflow is triggered by a repository dispatch event from WandB and tests the staged model using a separate test script. It also uses caching for uv and tests on Ubuntu.
 The third (linting) is for checking linting of the code using ruff. This workflow is triggered on pushes and pull requests to the main branch and checks the code for linting errors.
 The fourth workflow (docs) is for building and deploying our documentation to GitHub pages. This workflow is triggered on pushes to the main branch and builds the documentation using mkdocs.
 The fifth workflow, data_changes is triggered when there are changes to data tracked by DVC. It runs tests to ensure that the code works with the new data.
@@ -380,11 +383,15 @@ The third image (best_model_v0.png) shows the model artifact stored in W&B, whic
 >
 > Example:
 > *For our project we developed several images: one for training, inference and deployment. For example to run the*
-> *training docker image: `docker run trainer:latest lr=1e-3 batch_size=64`. Link to docker file: <weblink>*
+> *training docker image: `docker run trainer:latest lr=1e-3 batch_size=64`. Link to docker file: `<weblink>`*
 >
 > Answer:
 
---- question 15 fill here ---
+For our project we developed several Docker images: one for training and two for API inference (one for local development and one for cloud deployment).
+
+The training Docker image (`dockerfiles/train.dockerfile`) uses the uv package manager and can be run with `docker run train:latest` followed by Hydra configuration arguments like `learning_rate=0.001 batch_size=64`. This ensures reproducible training environments across different machines.
+
+For API inference, we have two Docker images. The local API image (`dockerfiles/api.dockerfile`) can be built with `docker build -t api:latest -f dockerfiles/api.dockerfile .` and run with `docker run -p 8000:8000 api:latest` for local testing. The cloud API Docker image (`backend/Dockerfile`) is used for cloud deployment and automatically downloads the best model from WandB during the build process. To build it, we use `docker build -t mlops-fastapi:latest --build-arg WANDB_API_KEY=your_key -f backend/Dockerfile .` and then run it with `docker run -p 8080:8080 -e PORT=8080 mlops-fastapi:latest`. This image is deployed to Google Cloud Run for production inference and provides multiple endpoints including `/predict` for model predictions and `/drift/features` for data drift detection. 
 
 ### Question 16
 
