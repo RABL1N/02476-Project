@@ -12,7 +12,7 @@ from torchvision import transforms
 from tqdm import tqdm
 
 from mlops_project.data import ChestXRayDataset
-from mlops_project.model import LitModel
+from mlops_project.model_lightning import LitModel
 
 log = logging.getLogger(__name__)
 from pytorch_lightning import Trainer
