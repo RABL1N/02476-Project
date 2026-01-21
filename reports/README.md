@@ -123,7 +123,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 1 fill here ---
+85
 
 ### Question 2
 > **Enter the study number for each member in the group**
@@ -134,7 +134,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 2 fill here ---
+s234835, 
 
 ### Question 3
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
@@ -168,8 +168,9 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 4 fill here ---
+We managed dependencies in this project using the uv package manager. All project dependencies are declared in the pyproject.toml file, which serves as the single source of truth for required packages. Exact, pinned dependency versions are stored in the automatically generated uv.lock file. This ensures that the same dependency versions are installed across different machines, operating systems, and environments.
 
+To obtain an exact copy of the development environment, a new team member would first need to clone the GitHub repository, then install uv and ensure it is available in their system path. From the project root, running uv sync will create a virtual environment and install all dependencies exactly as specified in uv.lock. This guarantees full reproducibility of the Python environment without manual version management.
 ### Question 5
 
 > **We expect that you initialized your project using the cookiecutter template. Explain the overall structure of your**
@@ -184,7 +185,11 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 5 fill here ---
+The project was initialized using the provided cookiecutter MLOps template, which we followed closely and filled out the core components required for a full MLOps workflow. The src/mlops_project directory contains the main application logic, including data handling, model definition, training, evaluation, and the FastAPI inference API. The tests directory was populated with unit tests for data processing, model construction, and training logic, following the structure suggested by the template.
+
+Configuration files were placed in the configs directory and managed using Hydra to enable reproducible and configurable experiments. The data directory was used in combination with DVC to track and version datasets stored remotely in a Google Cloud Storage bucket. CI workflows were implemented under .github/workflows, extending the template with additional pipelines for linting, staged model testing, and data-change triggers.
+
+We made a few deviations from the original template by adding a frontend directory for a Streamlit application, a load_tests directory for Locust-based load testing, and additional Dockerfiles to support training and deployment.
 
 ### Question 6
 
@@ -393,7 +398,11 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 18 fill here ---
+The GCP Engine was used as the primary infrastructure for model training in this project. We created a dedicated virtual machine (VM) to run training workloads that were computationally heavier than what was practical to run locally. The VM acted as a reproducible training environment that could be synced with the GitHub repository and the DVC-managed dataset stored in a Google Cloud Storage bucket.
+
+The VM was configured with a standard Linux-based image and sufficient CPU and memory resources to support training a convolutional neural network on image data. GPU acceleration was not strictly required for this project, so we relied on CPU-based instances. Dependencies were installed using the same uv-based setup as in local development to ensure environment consistency.
+
+Training was triggered manually after syncing the repository and data to the VM using provided setup and sync scripts. Experiment metrics and trained models were logged to Weights & Biases, allowing us to monitor training remotely without direct interaction with the VM. This setup ensured reproducibility, scalability, and separation between development and training environments.
 
 ### Question 19
 
