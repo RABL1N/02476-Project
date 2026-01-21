@@ -24,6 +24,7 @@ Train the model
 uv run python main.py train
 Run unit tests
 uv run python main.py test
+```
 
 ## Overall project checklist
 
