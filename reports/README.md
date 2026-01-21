@@ -591,4 +591,12 @@ Training was triggered manually after syncing the repository and data to the VM 
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
---- question 31 fill here ---
+s234835 contributed mainly to improving documentation, the command-line interface, and pre-commit/config updates. They authored commits for revising the README with detailed project answers and status updates, adding the architecture diagram and flowchart enhancements, writing application usage documentation, and marking completion of workflow checklist items such as pre-commit hooks and CI workflow on data changes. 
+
+The-Laug (sXXXXXX) focused on core code development, refactoring, and training improvements. Their commits include adding PyTorch Lightning support and distributed data loading, work on staged model tests and CI integration, initial setup of model and training code, and other backend structural changes. This includes maintaining the model training logic and test setups that underpin correct automated workflows.
+
+AFugl (sXXXXXX) focused on API functionality, DevOps, and CI/CD infrastructure. Their commits include backend Docker work, adding and fixing API endpoints, load testing configuration, merging branches related to fastapi inference, updating checklist statuses, and tests to make api.py and CI tests work correctly. They also worked on GCP VM sync scripts and data versioning with DVC and GCS.
+
+RABL1N (sXXXXXX) contributed across multiple areas including foundational setup, initial model commits, training logic additions, DVC and GCS integration, WandB logging and model registry integration, and broader cloud deployment documentation. They also updated tests and fixed various configuration and GitHub Pages documentation issues.
+
+All members actively participated in code reviews, task coordination, debugging, and development decisions throughout the project. Generative AI tools such as ChatGPT were used to clarify concepts, write and debug code, and help generate documentation text, and GitHub Copilot was used to assist with writing and completing code segments.
