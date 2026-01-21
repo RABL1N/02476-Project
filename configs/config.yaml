@@ -10,7 +10,9 @@ model_dir: models
 # Training hyperparameters
 batch_size: 64
 num_epochs: 10
+num_workers: 4
 learning_rate: 0.001
+
 
 # Device (null = auto-detect)
 device: null
@@ -42,3 +44,8 @@ wandb:
 
 early_stopping_patience: 5
 fake_training: false
+
+trainer:
+  accelerator: "cpu"
+  devices: 2
+  max_epochs: 10

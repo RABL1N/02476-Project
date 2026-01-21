@@ -26,6 +26,13 @@ def train(ctx: Context, fake_training: bool = False) -> None:
         cmd += " fake_training=true"
     ctx.run(cmd, echo=True, pty=not WINDOWS)
 
+@task(help={"fake_training": "Enable fast/fake training mode for CI or testing."})
+def lightning_train(ctx: Context, fake_training: bool = False) -> None:
+    """Train model. Use --fake-training to enable fast/fake mode."""
+    cmd = f"uv run src/{PROJECT_NAME}/train_lightning.py"
+    if fake_training:
+        cmd += " fake_training=true"
+    ctx.run(cmd, echo=True, pty=not WINDOWS)
 
 @task
 def test(ctx: Context) -> None:
