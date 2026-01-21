@@ -6,12 +6,22 @@ import json
 
 import torch
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 from torchvision import transforms
 
 from mlops_project.model import Model
 
+
+
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # OK for course/demo
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Configuration
 MODEL_PATH = Path("models/best_model.pt")
