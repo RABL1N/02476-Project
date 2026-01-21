@@ -12,26 +12,9 @@ The dataset used in this project consists of chest X ray images from pediatric p
 
 The project will initially use a simple convolutional neural network for image classification. If time allows transfer learning with pretrained image classification models may be explored. The emphasis is on model training evaluation and reproducibility rather than model complexity.
 
-## Application Usage
-
-This project exposes a simple command-line interface for running the main workflows.
-All commands are executed from the project root using `uv`.
-
-### Download and prepare the dataset
-```bash
-uv run python main.py data
-Train the model
-uv run python main.py train
-Run unit tests
-uv run python main.py test
-```
-
 ## Overall project checklist
 
- The checklist is *exhaustive* which means that it includes everything that you could do on the project included in the
- curriculum in this course. Therefore, we do not expect at all that you have checked all boxes at the end of the project.
- The parenthesis at the end indicates what module the bullet point is related to. Please be honest in your answers, we
- will check the repositories and the code to verify your answers.
+The checklist is *exhaustive* which means that it includes everything that you could do on the project included in the curriculum in this course. Therefore, we do not expect at all that you have checked all boxes at the end of the project. The parenthesis at the end indicates what module the bullet point is related to. Please be honest in your answers, we will check the repositories and the code to verify your answers.
 
 ### Week 1
 
@@ -39,7 +22,7 @@ uv run python main.py test
 * [X] Make sure that all team members have write access to the GitHub repository (M5)
 * [X] Create a dedicated environment for you project to keep track of your packages (M2)
 * [X] Create the initial file structure using cookiecutter with an appropriate template (M6)
-* [ ] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
+* [X] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
 * [X] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
 * [X] Remember to fill out the `requirements.txt` and `requirements_dev.txt` file with whatever dependencies that you
   are using (M2+M6)
@@ -47,8 +30,21 @@ uv run python main.py test
 * [X] Do a bit of code typing and remember to document essential parts of your code (M7)
 * [X] Setup version control for your data or part of your data (M8)
 * [X] Add command line interfaces and project commands to your code where it makes sense (M9)
-* [ ] Construct one or multiple docker files for your code (M10)
-* [ ] Build the docker files locally and make sure they work as intended (M10)
+  <<<<<<< HEAD
+* [X] Construct one or multiple docker files for your code (M10)
+* [X] Build the docker files locally and make sure they work as intended (M10)
+  ========================================================================
+* [X] Construct one or multiple docker files for your code (M10)
+* [X] Build the docker files locally and make sure they work as intended (M10)
+
+>>>>>>> 9a417ed (updated readme)
+>>>>>>>
+>>>>>>
+>>>>>
+>>>>
+>>>
+>>
+
 * [X] Write one or multiple configurations files for your experiments (M11)
 * [X] Used Hydra to load the configurations and manage your hyperparameters (M11)
 * [ ] Use profiling to optimize your code (M12)
@@ -76,7 +72,7 @@ uv run python main.py test
 * [X] Write API tests for your application and setup continues integration for these (M24)
 * [X] Load test your application (M24)
 * [ ] Create a more specialized ML-deployment API using either ONNX or BentoML, or both (M25)
-* [ ] Create a frontend for your API (M26)
+* [X] Create a frontend for your API (M26)
 
 ### Week 3
 
@@ -103,52 +99,154 @@ uv run python main.py test
 The directory structure of the project looks like this:
 
 ```txt
-├── .github/                  # Github actions and dependabot
+├── .devcontainer/              # Dev container configuration
+│   ├── devcontainer.json
+│   └── post_create.sh
+├── .dvc/                       # DVC configuration
+│   ├── .gitignore
+│   └── config
+├── .github/                    # Github actions and dependabot
+│   ├── agents/
+│   │   └── dtu_mlops_agent.md
 │   ├── dependabot.yaml
+│   ├── prompts/
+│   │   └── add_test.prompt.md
 │   └── workflows/
+│       ├── data_changes.yaml
+│       ├── linting.yaml
+│       ├── stage_model.yaml
+│       ├── test_staged_model.yaml
 │       └── tests.yaml
-├── configs/                  # Configuration files
-├── data/                     # Data directory
-│   ├── processed
-│   └── raw
-├── dockerfiles/              # Dockerfiles
-│   ├── api.Dockerfile
-│   └── train.Dockerfile
-├── docs/                     # Documentation
-│   ├── mkdocs.yml
+├── backend/                    # Backend deployment files
+│   ├── backend_requirements.txt
+│   └── Dockerfile
+├── configs/                    # Configuration files
+│   ├── .gitkeep
+│   └── config.yaml
+├── data/                       # Data directory (version controlled with DVC)
+│   └── raw.dvc
+├── dockerfiles/                # Dockerfiles
+│   ├── api.dockerfile
+│   └── train.dockerfile
+├── docs/                       # Documentation
+│   ├── mkdocs.yaml
+│   ├── README.md
 │   └── source/
 │       └── index.md
-├── models/                   # Trained models
-├── notebooks/                # Jupyter notebooks
-├── reports/                  # Reports
-│   └── figures/
-├── src/                      # Source code
-│   ├── project_name/
-│   │   ├── __init__.py
-│   │   ├── api.py
-│   │   ├── data.py
-│   │   ├── evaluate.py
-│   │   ├── models.py
-│   │   ├── train.py
-│   │   └── visualize.py
-└── tests/                    # Tests
+├── frontend/                   # Frontend application
+│   ├── Dockerfile
+│   └── streamlit_app.py
+├── load_tests/                 # Load testing with Locust
+│   ├── locustfile.py
+│   ├── test_image.png
+│   └── reports/
+├── models/                     # Trained models (not in git)
+├── notebooks/                  # Jupyter notebooks
+├── reports/                    # Reports and figures
+│   ├── figures/
+│   └── .gitkeep
+├── src/                        # Source code
+│   └── mlops_project/
+│       ├── __init__.py
+│       ├── api.py
+│       ├── data.py
+│       ├── evaluate.py
+│       ├── model.py
+│       ├── train.py
+│       └── visualize.py
+├── staged_model_tests/         # Tests for staged models
+│   └── test_staged_model.py
+├── tests/                      # Unit tests
 │   ├── __init__.py
 │   ├── test_api.py
 │   ├── test_data.py
-│   └── test_model.py
+│   ├── test_model.py
+│   └── test_train.py
+├── .dvcignore
 ├── .gitignore
 ├── .pre-commit-config.yaml
+├── .python-version
+├── AGENTS.md                   # Guidance for coding agents
+├── dataloader.py
+├── download_model.py
 ├── LICENSE
-├── pyproject.toml            # Python project file
-├── README.md                 # Project README
-├── requirements.txt          # Project requirements
-├── requirements_dev.txt      # Development requirements
-└── tasks.py                  # Project tasks
+├── main.py                     # CLI entry point
+├── pyproject.toml              # Python project configuration
+├── README.md                   # This file
+├── setup_vm_git.sh            # VM setup script
+├── sync_vm.sh                 # VM sync script
+├── tasks.py                   # Invoke task definitions
+└── uv.lock                     # UV lock file
 ```
 
-Created using [mlops_template](https://github.com/SkafteNicki/mlops_template),
-a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting
-started with Machine Learning Operations (MLOps).
+Created using [mlops_template](https://github.com/SkafteNicki/mlops_template), a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting started with Machine Learning Operations (MLOps).
+
+## Application Usage
+
+This project exposes a simple command-line interface for running the main workflows.
+All commands are executed from the project root using `uv`.
+
+### Download and prepare the dataset
+
+```bash
+uv run python main.py data
+Train the model
+uv run python main.py train
+Run unit tests
+uv run python main.py test
+```
+
+## Public API and Frontend
+
+The application is deployed to Google Cloud Run and is publicly accessible:
+
+### API Endpoint
+
+The FastAPI backend is available at:
+
+- **Base URL:** `https://mlops-fastapi-304008424690.europe-west1.run.app`
+- **Health Check:** `https://mlops-fastapi-304008424690.europe-west1.run.app/health`
+- **Prediction Endpoint:** `https://mlops-fastapi-304008424690.europe-west1.run.app/predict`
+
+### Frontend
+
+The Streamlit web interface is available at:
+
+- **Frontend URL:** `https://mlops-frontend-304008424690.europe-west1.run.app`
+
+The frontend allows you to upload chest X-ray images and get predictions directly in your browser.
+
+### Using the API
+
+**Health Check:**
+
+```bash
+curl https://mlops-fastapi-304008424690.europe-west1.run.app/health
+```
+
+**Make a Prediction:**
+
+```bash
+curl -X POST "https://mlops-fastapi-304008424690.europe-west1.run.app/predict" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@path/to/your/image.jpeg"
+```
+
+The API will return a JSON response:
+
+```json
+{
+  "prediction": "NORMAL"
+}
+```
+
+or
+
+```json
+{
+  "prediction": "PNEUMONIA"
+}
+```
 
 ## GCP VM Setup and Syncing
 
@@ -157,24 +255,28 @@ This project includes scripts to set up and sync the project with a Google Cloud
 ### Initial Setup
 
 1. **Set up the repository on the VM:**
+
    ```bash
    ./setup_vm_git.sh
    ```
+
    This script will:
+
    - Install git on the VM (if needed)
    - Clone the repository from GitHub to `~/mlops_project` on the VM
    - Install `uv` package manager
    - Configure PATH for `uv`
-
 2. **Authenticate with Google Cloud Storage:**
    SSH into the VM and authenticate with your user credentials to access the DVC remote:
+
    ```bash
    gcloud compute ssh instance-20260113-110032 --zone=europe-west1-d
    gcloud auth application-default login
    ```
-   This is a one-time setup. Credentials will persist across sessions.
 
+   This is a one-time setup. Credentials will persist across sessions.
 3. **Install dependencies on the VM:**
+
    ```bash
    cd ~/mlops_project
    export PATH="$HOME/.local/bin:$PATH"  # If not already in PATH
@@ -190,6 +292,7 @@ After making changes locally and pushing to GitHub, sync the VM with:
 ```
 
 This script will:
+
 - Pull the latest code changes from GitHub
 - Pull the latest data files using DVC from Google Cloud Storage
 
@@ -209,6 +312,7 @@ The project includes a Docker setup for deploying the inference API. The Docker 
 ### How It Works
 
 The Dockerfile (`Dockerfile` in the project root) is configured to:
+
 1. Install all project dependencies
 2. Download the model with the "best" alias from WandB (`best_model:best`)
 3. Save the model to `models/best_model.pt` inside the container
@@ -227,6 +331,7 @@ docker build -t pneumonia-api:latest \
 ```
 
 To get your WandB API key:
+
 - Visit: https://wandb.ai/authorize
 - Or check your WandB settings
 
@@ -265,21 +370,25 @@ docker rm pneumonia-api
 Once the container is running, you can make predictions:
 
 **1. Check API health:**
+
 ```bash
 curl http://localhost:8080/health
 ```
 
 **2. Check which model is being used:**
+
 ```bash
 curl http://localhost:8080/model/info | python -m json.tool
 ```
 
 This endpoint shows:
+
 - Model path and size
 - WandB artifact information (name, version, validation accuracy, loss)
 - Model architecture details
 
 **3. Make a prediction:**
+
 ```bash
 curl -X POST "http://localhost:8080/predict" \
   -H "accept: application/json" \
@@ -288,6 +397,7 @@ curl -X POST "http://localhost:8080/predict" \
 ```
 
 Example with a test image:
+
 ```bash
 curl -X POST "http://localhost:8080/predict" \
   -H "accept: application/json" \
@@ -296,6 +406,7 @@ curl -X POST "http://localhost:8080/predict" \
 ```
 
 The response will be:
+
 ```json
 {
   "prediction": "NORMAL",
@@ -321,6 +432,7 @@ The `/model/info` endpoint confirms which model is loaded. Look for the `wandb_a
 This confirms the container is using the model with the "best" alias from WandB, which has the highest validation accuracy among all trained models.
 
 ### Automated testing of staged models
+
 When you train a model using:
 
 ```bash
