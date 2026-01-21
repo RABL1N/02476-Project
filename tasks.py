@@ -10,7 +10,7 @@ PYTHON_VERSION = "3.12"
 @task
 def preprocess_data(ctx: Context) -> None:
     """Preprocess data."""
-    ctx.run(f"uv run src/{PROJECT_NAME}/data.py data/raw data/processed", echo=True, pty=not WINDOWS)
+    ctx.run(f"uv run src/{PROJECT_NAME}/data.py data/raw/chest_xray data/processed", echo=True, pty=not WINDOWS)
 
 @task(help={"fake_training": "Enable fast/fake training mode for CI or testing."})
 def train(ctx: Context, fake_training: bool = False) -> None:

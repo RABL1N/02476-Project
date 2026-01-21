@@ -36,6 +36,7 @@ def train(cfg: DictConfig) -> None:
 
     batch_size = cfg.batch_size
     num_epochs = cfg.num_epochs
+    num_workers = getattr(cfg, "num_workers", 0)
 
     learning_rate = cfg.learning_rate
     num_classes = cfg.num_classes
@@ -55,6 +56,7 @@ def train(cfg: DictConfig) -> None:
     log.info(f"  Learning rate: {learning_rate}")
     log.info(f"  Number of classes: {num_classes}")
     log.info(f"  Device: {device}")
+    log.info(f"  Number of workers: {num_workers}")
 
     # Initialize WandB
     # Ensure entity is set to team (required for registry linking)
@@ -108,8 +110,12 @@ def train(cfg: DictConfig) -> None:
         num_epochs = 1
         log.info("FAKE TRAINING MODE: Using 4 train and 2 val samples, batch_size=4, num_epochs=1")
     # Create data loaders
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
+    train_loader = DataLoader(
+        train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers
+    )
+    val_loader = DataLoader(
+        val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers
+    )
 
     log.info(f"Train dataset size: {len(train_dataset)}")
     log.info(f"Validation dataset size: {len(val_dataset)}")
