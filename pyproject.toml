@@ -28,6 +28,8 @@ dependencies = [
     "pathspec<1",
     "pillow>=10.0.0",
     "python-multipart>=0.0.21",
+    "requests>=2.32.5",
+    "streamlit>=1.53.0",
     "torch==2.6.0",
     "torchvision>=0.19.0",
     "tqdm>=4.65.0",

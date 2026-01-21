@@ -45,15 +45,15 @@ The project will initially use a simple convolutional neural network for image c
 
 ### Week 2
 
-* [ ] Write unit tests related to the data part of your code (M16)
-* [ ] Write unit tests related to model construction and or model training (M16)
-* [ ] Calculate the code coverage (M16)
-* [ ] Get some continuous integration running on the GitHub repository (M17)
-* [ ] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
-* [ ] Add a linting step to your continuous integration (M17)
+* [X] Write unit tests related to the data part of your code (M16)
+* [X] Write unit tests related to model construction and or model training (M16)
+* [X] Calculate the code coverage (M16)
+* [X] Get some continuous integration running on the GitHub repository (M17)
+* [X] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
+* [X] Add a linting step to your continuous integration (M17)
 * [ ] Add pre-commit hooks to your version control setup (M18)
 * [ ] Add a continues workflow that triggers when data changes (M19)
-* [ ] Add a continues workflow that triggers when changes to the model registry is made (M19)
+* [X] Add a continues workflow that triggers when changes to the model registry is made (M19)
 * [X] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
 * [ ] Create a trigger workflow for automatically building your docker images (M21)
 * [X] Get your model training in GCP using either the Engine or Vertex AI (M21)
