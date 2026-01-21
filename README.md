@@ -12,6 +12,19 @@ The dataset used in this project consists of chest X ray images from pediatric p
 
 The project will initially use a simple convolutional neural network for image classification. If time allows transfer learning with pretrained image classification models may be explored. The emphasis is on model training evaluation and reproducibility rather than model complexity.
 
+## Application Usage (M32)
+
+This project exposes a simple command-line interface for running the main workflows.
+All commands are executed from the project root using `uv`.
+
+### Download and prepare the dataset
+```bash
+uv run python main.py data
+Train the model
+uv run python main.py train
+Run unit tests
+uv run python main.py test
+
 ## Overall project checklist
 
  The checklist is *exhaustive* which means that it includes everything that you could do on the project included in the
