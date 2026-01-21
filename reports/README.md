@@ -358,7 +358,17 @@ To be able to reproduce our experiments, we have set up 2 safeguards, WandB and 
 >
 > Answer:
 
---- question 14 fill here ---
+We used Weights & Biases (W&B) to track all our training experiments for the chest X-ray pneumonia classification model. As seen in the first image (best_model_overview_v0.png), W&B automatically tracks system information including hardware specifications, Python version, operating system, and runtime environment. This information is crucial for reproducibility, as it ensures we can recreate the exact conditions under which our model was trained.
+
+![Best Model Overview](figures/best_model_overview_v0.png)
+
+As seen in the second image (best_model_charts_v0.png), we tracked and visualized key training and validation metrics including loss and accuracy for both training and validation sets. These metrics are logged at each epoch, allowing us to monitor the model's learning progress. The training loss and accuracy inform us about how well the model is learning from the training data, while validation metrics are crucial for assessing generalization performance. By comparing these curves, we can identify when the model starts overfitting (validation metrics plateau or worsen while training metrics continue improving) and implement early stopping accordingly.
+
+![Best Model Charts](figures/best_model_charts_v0.png)
+
+The third image (best_model_v0.png) shows the model artifact stored in W&B, which includes metadata such as the best validation accuracy (81.25%) and best validation loss. We also logged hyperparameters including learning rate, batch size, number of epochs, and model architecture parameters. These metrics are important because they enable us to compare different experimental runs, reproduce successful configurations, and select the best-performing model for deployment. The validation accuracy is particularly critical as it directly measures how well our model will perform on unseen data, which is the ultimate goal for a medical diagnosis application.
+
+![Best Model Artifact](figures/best_model_v0.png)
 
 ### Question 15
 
@@ -470,7 +480,11 @@ Training was triggered manually after syncing the repository and data to the VM 
 >
 > Answer:
 
---- question 22 fill here ---
+We managed to train our model in the cloud using the Engine (Google Cloud Compute Engine). We did this by creating a dedicated virtual machine instance in the europe-west1-d zone, which provided a reproducible training environment separate from our local development setup. The VM was configured with sufficient CPU and memory resources to handle training a convolutional neural network on chest X-ray images.
+
+To set up the training environment, we used setup scripts that cloned our GitHub repository to the VM and installed dependencies using the same uv-based package management system used locally, ensuring environment consistency. The training data was accessed from a Google Cloud Storage bucket managed through DVC, allowing the VM to pull the required datasets without storing them locally.
+
+Training was executed manually by SSH-ing into the VM and running the training script, which used PyTorch Lightning and logged all metrics and model artifacts to Weights & Biases. We chose the Engine over Vertex AI because it provided more direct control over the training environment, was simpler to set up for our needs, and offered a cost-effective solution for CPU-based training without requiring the additional abstraction layer that Vertex AI provides.
 
 ## Deployment
 
