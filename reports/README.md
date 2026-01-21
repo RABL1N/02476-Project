@@ -352,7 +352,17 @@ The fifth workflow, data_changes is triggered when there are changes to data tra
 >
 > Answer:
 
---- question 14 fill here ---
+We used Weights & Biases (W&B) to track all our training experiments for the chest X-ray pneumonia classification model. As seen in the first image (best_model_overview_v0.png), W&B automatically tracks system information including hardware specifications, Python version, operating system, and runtime environment. This information is crucial for reproducibility, as it ensures we can recreate the exact conditions under which our model was trained.
+
+![Best Model Overview](figures/best_model_overview_v0.png)
+
+As seen in the second image (best_model_charts_v0.png), we tracked and visualized key training and validation metrics including loss and accuracy for both training and validation sets. These metrics are logged at each epoch, allowing us to monitor the model's learning progress. The training loss and accuracy inform us about how well the model is learning from the training data, while validation metrics are crucial for assessing generalization performance. By comparing these curves, we can identify when the model starts overfitting (validation metrics plateau or worsen while training metrics continue improving) and implement early stopping accordingly.
+
+![Best Model Charts](figures/best_model_charts_v0.png)
+
+The third image (best_model_v0.png) shows the model artifact stored in W&B, which includes metadata such as the best validation accuracy (81.25%) and best validation loss. We also logged hyperparameters including learning rate, batch size, number of epochs, and model architecture parameters. These metrics are important because they enable us to compare different experimental runs, reproduce successful configurations, and select the best-performing model for deployment. The validation accuracy is particularly critical as it directly measures how well our model will perform on unseen data, which is the ultimate goal for a medical diagnosis application.
+
+![Best Model Artifact](figures/best_model_v0.png)
 
 ### Question 15
 
