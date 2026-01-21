@@ -1,7 +1,6 @@
 from pathlib import Path
 import io
 from datetime import datetime
-import os
 import json
 
 import torch
@@ -60,8 +59,7 @@ preprocess = transforms.Compose(
     [
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                             std=[0.229, 0.224, 0.225]),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ]
 )
 
@@ -76,10 +74,10 @@ def model_info():
     """Get information about the loaded model."""
     model_stat = MODEL_PATH.stat() if MODEL_PATH.exists() else None
     metadata_path = Path("models/artifact_metadata.json")
-    
+
     # Load model to get info (if not already loaded)
     model = load_model() if MODEL_PATH.exists() else None
-    
+
     info = {
         "model_path": str(MODEL_PATH.absolute()),
         "model_exists": MODEL_PATH.exists(),
@@ -88,23 +86,29 @@ def model_info():
         "num_classes": 2,
         "class_names": CLASS_NAMES,
     }
-    
+
     if model_stat:
-        info.update({
-            "model_size_bytes": model_stat.st_size,
-            "model_size_mb": round(model_stat.st_size / (1024 * 1024), 2),
-            "model_modified": datetime.fromtimestamp(model_stat.st_mtime).isoformat(),
-        })
-    
+        info.update(
+            {
+                "model_size_bytes": model_stat.st_size,
+                "model_size_mb": round(model_stat.st_size / (1024 * 1024), 2),
+                "model_modified": datetime.fromtimestamp(
+                    model_stat.st_mtime
+                ).isoformat(),
+            }
+        )
+
     # Count model parameters
     if model is not None:
         total_params = sum(p.numel() for p in model.parameters())
         trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-        info.update({
-            "total_parameters": total_params,
-            "trainable_parameters": trainable_params,
-        })
-    
+        info.update(
+            {
+                "total_parameters": total_params,
+                "trainable_parameters": trainable_params,
+            }
+        )
+
     # Add WandB artifact information if available
     if metadata_path.exists():
         try:
@@ -119,8 +123,10 @@ def model_info():
         except Exception as e:
             info["wandb_artifact"] = {"error": f"Could not read metadata: {e}"}
     else:
-        info["wandb_artifact"] = {"note": "Metadata not available (model may not be from WandB)"}
-    
+        info["wandb_artifact"] = {
+            "note": "Metadata not available (model may not be from WandB)"
+        }
+
     return info
 
 

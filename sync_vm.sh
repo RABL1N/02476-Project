@@ -20,18 +20,18 @@ gcloud compute ssh --zone="$VM_ZONE" "${VM_USER}@${VM_INSTANCE}" --command="
         echo 'Error: Repository not found. Run ./setup_vm_git.sh first.'
         exit 1
     fi
-    
+
     cd $REMOTE_DIR
     echo 'Fetching latest changes...'
     git fetch origin
-    
+
     echo 'Checking current branch...'
     CURRENT_BRANCH=\$(git rev-parse --abbrev-ref HEAD)
     echo \"Current branch: \$CURRENT_BRANCH\"
-    
+
     echo 'Pulling latest changes...'
     git pull origin \$CURRENT_BRANCH || git pull origin main || git pull origin master
-    
+
     if [ \$? -eq 0 ]; then
         echo 'Git sync complete!'
         echo ''
@@ -52,18 +52,18 @@ fi
 echo -e "${YELLOW}Pulling latest data with DVC...${NC}"
 gcloud compute ssh --zone="$VM_ZONE" "${VM_USER}@${VM_INSTANCE}" --command="
     cd $REMOTE_DIR
-    
+
     # Ensure uv is in PATH
     export PATH=\"\$HOME/.local/bin:\$PATH\"
-    
+
     if ! command -v uv &> /dev/null; then
         echo 'Error: uv is not installed. Run ./setup_vm_git.sh first.'
         exit 1
     fi
-    
+
     echo 'Running: uv run dvc pull'
     uv run dvc pull
-    
+
     DVC_EXIT_CODE=\$?
     if [ \$DVC_EXIT_CODE -eq 0 ]; then
         echo 'DVC pull complete!'

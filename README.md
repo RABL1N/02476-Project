@@ -12,6 +12,20 @@ The dataset used in this project consists of chest X ray images from pediatric p
 
 The project will initially use a simple convolutional neural network for image classification. If time allows transfer learning with pretrained image classification models may be explored. The emphasis is on model training evaluation and reproducibility rather than model complexity.
 
+## Application Usage
+
+This project exposes a simple command-line interface for running the main workflows.
+All commands are executed from the project root using `uv`.
+
+### Download and prepare the dataset
+```bash
+uv run python main.py data
+Train the model
+uv run python main.py train
+Run unit tests
+uv run python main.py test
+```
+
 ## Overall project checklist
 
  The checklist is *exhaustive* which means that it includes everything that you could do on the project included in the
@@ -51,8 +65,8 @@ The project will initially use a simple convolutional neural network for image c
 * [X] Get some continuous integration running on the GitHub repository (M17)
 * [X] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
 * [X] Add a linting step to your continuous integration (M17)
-* [ ] Add pre-commit hooks to your version control setup (M18)
-* [ ] Add a continues workflow that triggers when data changes (M19)
+* [X] Add pre-commit hooks to your version control setup (M18)
+* [X] Add a continues workflow that triggers when data changes (M19)
 * [X] Add a continues workflow that triggers when changes to the model registry is made (M19)
 * [X] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
 * [ ] Create a trigger workflow for automatically building your docker images (M21)
@@ -77,7 +91,7 @@ The project will initially use a simple convolutional neural network for image c
 
 ### Extra
 
-* [ ] Write some documentation for your application (M32)
+* [X] Write some documentation for your application (M32)
 * [ ] Publish the documentation to GitHub Pages (M32)
 * [ ] Revisit your initial project description. Did the project turn out as you wanted?
 * [ ] Create an architectural diagram over your MLOps pipeline

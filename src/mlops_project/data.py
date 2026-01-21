@@ -42,10 +42,13 @@ class ChestXRayDataset(Dataset):
         for label_name, label_idx in self.class_labels.items():
             class_dir = split_dir / label_name
             if class_dir.exists():
-                image_files = sorted([
-                    f for f in class_dir.iterdir()
-                    if f.is_file() and f.suffix.lower() in [".jpg", ".jpeg", ".png"]
-                ])
+                image_files = sorted(
+                    [
+                        f
+                        for f in class_dir.iterdir()
+                        if f.is_file() and f.suffix.lower() in [".jpg", ".jpeg", ".png"]
+                    ]
+                )
                 self.image_paths.extend(image_files)
                 self.labels.extend([label_idx] * len(image_files))
 
