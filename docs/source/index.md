@@ -34,6 +34,24 @@ uv run python main.py train
 ```bash
 uv run python main.py test
 ```
+## Architecture Overview
+
+The following diagram illustrates the overall MLOps pipeline implemented in this project,
+from data ingestion to deployment and inference.
+
+```mermaid
+flowchart LR
+    A[Chest X-ray Dataset (Kaggle)]
+    B[DVC + GCS Bucket]
+    C[Training on GCP VM]
+    D[Weights & Biases]
+    E[Model Registry]
+    F[GitHub Actions]
+    G[Docker Image]
+    H[FastAPI Inference API]
+    I[GCP Deployment]
+    J[End Users]
+```
 
 ## Project structure
 
