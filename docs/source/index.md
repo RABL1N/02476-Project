@@ -53,48 +53,42 @@ The following diagram illustrates the overall MLOps pipeline implemented in this
 from data ingestion to deployment and inference.
 
 ```mermaid
-flowchart LR
-
-  %% ===== DATA =====
-  subgraph DATA["Data"]
-    A["Chest Xray Dataset"]
-    B["DVC and GCS Bucket"]
-    A -->|download + version| B
-  end
+flowchart TB
 
   %% ===== DEV + CI =====
   subgraph DEV["Development and CI"]
-    GH["GitHub Repository"]
-    CI["GitHub Actions CI"]
-    GH -->|push / PR| CI
+    direction LR
+    GH["GitHub Repository"] -->|push / PR| CI["GitHub Actions CI"]
+  end
+
+  %% ===== DATA =====
+  subgraph DATA["Data"]
+    direction LR
+    A["Chest Xray Dataset"] -->|download + version| B["DVC and GCS Bucket"]
   end
 
   %% ===== TRAINING =====
   subgraph TRAIN["Training"]
-    VM["Training on GCP VM"]
-    WB["Weights and Biases"]
-    REG["Model Registry"]
-    B -->|dvc pull| VM
-    VM -->|train + log| WB
-    WB -->|artifact| REG
+    direction LR
+    B -->|dvc pull| VM["Training on GCP VM"]
+    VM -->|train + log| WB["Weights and Biases"]
+    WB -->|artifact| REG["Model Registry"]
   end
 
   %% ===== VALIDATION / STAGING =====
   subgraph VALID["Validation and Staging"]
-    ST["Staged Model Tests"]
+    direction LR
     REG -->|registry change| CI
-    CI --> ST
-    ST -->|pass| TAG["Tag as best"]
+    CI --> ST["Staged Model Tests"]
+    ST -->|pass| TAG["Promote best model"]
   end
 
   %% ===== DEPLOYMENT =====
   subgraph DEPLOY["Deployment"]
-    IMG["Docker Image"]
-    API["FastAPI Inference API"]
-    CLOUD["GCP Deployment"]
-    TAG --> IMG
-    IMG --> API
-    API --> CLOUD
+    direction LR
+    TAG --> IMG["Docker Image"]
+    IMG --> API["FastAPI Inference API"]
+    API --> CLOUD["GCP Deployment"]
   end
 
   USER["End Users"] -->|HTTP requests| CLOUD
