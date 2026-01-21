@@ -1,6 +1,7 @@
 site_name: mlops_project
-site_author: Your name (or your organization/company/team)
+site_author: ML-Ops Group 85
 docs_dir: source
+site_url: https://RABL1N.github.io/mlops_project
 
 theme:
   language: en
@@ -11,13 +12,10 @@ theme:
 
 plugins:
   - search
-  - mkdocstrings:
-      handlers:
-        python:
-          options:
-            show_root_heading: true
-            separate_signature: true
-            show_signature_annotations: true
 
 nav:
   - Home: index.md
+  - Getting Started: getting-started.md
+  - API and Frontend: api.md
+  - Deployment: deployment.md
+  - Testing: testing.md
