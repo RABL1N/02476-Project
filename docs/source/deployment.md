@@ -121,7 +121,7 @@ This project includes scripts to set up and sync the project with a Google Cloud
    SSH into the VM and authenticate with your user credentials to access the DVC remote:
 
    ```bash
-   gcloud compute ssh instance-20260113-110032 --zone=europe-west1-d
+   gcloud compute ssh --zone "europe-west1-d" "instance-20260113-110032" --project "machineoperationproject"
    gcloud auth application-default login
    ```
 
