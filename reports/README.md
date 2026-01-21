@@ -620,7 +620,8 @@ In total we ended up using 228.37 danish crowns (DKK). The largest factor came f
 >
 > Answer:
 
-![Overview of the MLOps architecture](docs/source/figures/architecture_diagram.png)
+![Overview of the MLOps architecture](../docs/source/figures/architecture_diagram.png)
+
 The figure illustrates the overall architecture of our machine learning system and the services used throughout the MLOps lifecycle. The starting point of the diagram is the local development setup, where we develop the code and configurations for data processing, model training, and deployment. Dependency management is handled consistently across environments to ensure reproducibility. When changes are committed and pushed to the GitHub repository, this automatically triggers continuous integration workflows using GitHub Actions.
 
 GitHub Actions is responsible for running unit tests, linting, and validation steps to ensure code quality. In parallel, data is versioned using DVC, with datasets stored remotely in a Google Cloud Storage (GCS) bucket. This allows the exact dataset versions used for training to be reproduced across different machines and environments.
