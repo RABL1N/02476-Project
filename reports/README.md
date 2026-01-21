@@ -321,6 +321,11 @@ The fifth workflow, data_changes is triggered when there are changes to data tra
 > Answer:
 
 --- question 12 fill here ---
+We configured our experiments using Hydra configuration files. The configuration files are stored in the configs directory to allow for easy management of different experiment settings. This way, we could run experiments with different configurations without changing the code itself. To run an experiment, we would simply change the config file and run the training script using uv.
+```bash
+uv run invoke train
+```
+
 
 ### Question 13
 
@@ -336,6 +341,7 @@ The fifth workflow, data_changes is triggered when there are changes to data tra
 > Answer:
 
 --- question 13 fill here ---
+To be able to reproduce our experiments, we have set up 2 safeguards, WandB and hydra. WandB saves every experiment that we run, including the config files, the metrics and the model artifacts. This way we can always go back and see what settings we used for a particular experiment, and we can also download the model artifacts to use them later. Hydra allows us to manage our configuration files in a structured way, so we can easily change settings and run experiments with different configurations. When we have completed a run, hydra also saves the configuration used for that experiments in the outputs directory, so we can always go back and see what settings we used for a particular experiment. To reproduce an experiment, one would have to go to WandB, find the experiment and download the config file and the model artifacts. Then one would have to set up the environment using uv and run the training script with the downloaded config file.
 
 ### Question 14
 
@@ -383,6 +389,10 @@ The fifth workflow, data_changes is triggered when there are changes to data tra
 > Answer:
 
 --- question 16 fill here ---
+For debugging we mostly used logging and the VSCode built in python debugger. Logging allowed us to see what was happening in the code without having to stop the execution, and the VSCode debugger allowed us to step through the code and see what was happening at each step. 
+For bugs in the infrastructure (CI/CD, DVC, GCP etc.) we mostly relied on the error messages provided by the services, as they were usually quite descriptive and pointed us in the right direction. On top of this we used the documentation of the services to understand what was going wrong.
+We did not do any profiling of our code, as we did not have any major performance issues. However, we did try to write efficient code from the start, as we knew that we would be running our code quite some times during development and testing.
+We could have used profiling to identify bottlenecks in our code, especially as we were running on a limited budget for GCP, but we found other tasks more interesting.
 
 ## Working in the cloud
 
@@ -590,6 +600,7 @@ Training was triggered manually after syncing the repository and data to the VM 
 > Answer:
 
 --- question 30 fill here ---
+For the unit testing and github workflows one of the biggest struggles was in getting the webhook to work between WandB and GitHub. This was a matter of setting up proper API keys and sharing permissions between the two services. This was especially cumbersome, as it would only be tested on new models being staged, meaning that we had to train a new model for each test of the webhook, and since our webhook was sent to GitHub, we could not (easily) test it locally using act.
 
 ### Question 31
 
