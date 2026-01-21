@@ -263,7 +263,9 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 10 fill here ---
+We used DVC to have version control on our dataset as well as keep it separate from Git. We were able to track the data directory with 'dvc add ...' and committed the thereby generated '.dvc' files and 'dvc.lock' to the repository. The files held information about the remote repository and what data we were using. The actual data files were stored in a shared Google Drive remote storage. 
+
+This enabled us to be able to all use the same dataset state with 'dvc pull' command. This improved the project by making the data used for training and evaluation the same for all of us. Each Git commit points to an exact data version, so we can rerun experiments and thereby get consistent results. It helped the collaboration and make communication easier this way. 
 
 ### Question 11
 
@@ -378,7 +380,12 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 17 fill here ---
+We used the following 5 services: Cloud Run, VM Manager, Networking, Cloud Storage and Compute Engine:
+Cloud run is used for deploying our containerized FastAPI backend as well as frontend.
+VM Manager is used for monitoring Compute Engine VMs.
+Networking is used to monitor resources and traffic used by the project through other services.
+Cloud Storage is used for storing large files such as datasets and artifacts.
+Compute Engine is virtual machines used for running training jobs or experiments.
 
 ### Question 18
 
@@ -402,7 +409,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 19 fill here ---
+![my_image](figures/GCP_bucket.png)
 
 ### Question 20
 
@@ -411,7 +418,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 20 fill here ---
+![my_image](figures/GCP_registry.png)
 
 ### Question 21
 
@@ -452,7 +459,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 23 fill here ---
+We implemented a FastAPI backend that loads the best trained model from WandB and exposes HTTP endpoints a user can interact with. The main endpoint to do so is '/predict', where you can upload an image file, apply the same preprocessing as during training, and then run the model to return the predicted class, if it is NORMAL (0) or PNEUMONIA (1). We also added a '/health' endpoint to see if the side is up and running (mostly used for testing), and an endpoint for checking data drifting. We kept it very basic with only the neceszary endpoints to have a working environment. 
 
 ### Question 24
 
@@ -468,7 +475,15 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 24 fill here ---
+We managed to deploy our API both locally and in the cloud. Locally we run the FastAPI application with Uvicorn and can access the endpoints on 'http://127.0.0.1:8000/. This service can use '/health' for availability check and '/predict' for evaluating an image. For the cloud deployment, we containerized the frontend and beckend sperately with Docker and deployed each container to Google Cloud Run, which gives us a public HTTPS URL we can use to access the endpoints. To invoke the service an user would use the following command:
+curl -X POST https://https://mlops-fastapi-304008424690.europe-west1.run.app/predict -F "file=@path/to/xray.png"
+
+or uses the frontend at:
+https://mlops-frontend-304008424690.europe-west1.run.app
+
+We also added an endpoint for checking data drifting which was also deployed as an API with the rest of the service. The data drifting can be checked with the following command:
+curl -X POST https://YOUR_CLOUD_RUN_URL/drift/features -H "Content-Type: application/json" --data-binary "@drift_payload.json"
+
 
 ### Question 25
 
@@ -483,7 +498,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 25 fill here ---
+We did both unit testing and load testing of our API. For unit testing we used pytest and FastAPI's TestClient to test that the main endpoints responded as expected. We included tests for '/health' to ensure that the service returns code 200. We also implemented tests for '/predict' where we uploaded a small example image (taken randomly from the dataset) and verified that the response contained the expected fields. For load testing we used Locust to generate specific loads of traffic against the deployed Cloud Run URL. We defined a locust instance with 20 concurrent users that would send requests once per 2 seconds and has no performance issues what so ever. Only the '/predict' endpoint was load tested. 
 
 ### Question 26
 
@@ -498,7 +513,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 26 fill here ---
+We did implement monitoring of our deployed model. Since the API s deployed on Goggle Cloud Run, we used Cloud Runs' built-in metrics to track things like request count, request latence ect. We also created two SLO's for availability and latency to define expeced service behavier over time. On top of this, we created alerting policies in Cloud Monitoring so we would get notifications if the service didn't live up a specific threshold for latency or if the service starts returning server errors, indicating that it isn't working. For monitoring the model itself, we added the drift endpoint '/drift/features' we can use to compare incoming feature batches against a stored reference.This can help discover drifting early as we can follow how data might change over time. This monitoring can help the longevity of the application because it can makes problems visible before they appear to the users. So it is all about discovering issues before they become overwhelming. 
 
 ## Overall discussion of project
 
@@ -517,7 +532,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 27 fill here ---
+In total we ended up using 228.37 danish crowns (DKK). The largest factor came from Compute Engine with 223.27 DKK, followed by other services with small contributions: Cloud Run 0.33 DKK, Cloud Storage 0.76 DKK, networking 2.34 DKK and VM Manager 2.34 DKK. There are multiple reasons why Compute Engine is so large compared to the others. The first thing is that we chose a VM with high RAM and many vCPUs available to speed up the training as much as possible. It was decided that since the training was done in a short time, the specific VM choice would not matter much. However, it was not taken into account that the person responsible for stopping the instance would forget to do so. It was fun to work in the cloud during this project, as it made many things possible that would otherwise not have been. The scaling and power of the cloud makes it an effective tool, but also a complex one. We faced some struggles when setting things up, especially with permissions, where people sometimes lacked access to perform assigned tasks. By being persistent, we managed to get most things working and see the results of our work.
 
 ### Question 28
 
