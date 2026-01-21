@@ -39,7 +39,7 @@ if source_dir.exists():
                 print(f"Copying {dir_name}/...")
                 shutil.copytree(src_dir, dest_dir)
                 copied_any = True
-    
+
     if copied_any:
         print(f"\nDataset copied successfully to: {local_data_dir.absolute()}")
     else:
