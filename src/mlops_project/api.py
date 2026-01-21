@@ -11,6 +11,13 @@ from torchvision import transforms
 
 from mlops_project.model import Model
 
+from pydantic import BaseModel, Field
+from typing import List, Optional
+
+import pandas as pd
+from evidently.legacy.report import Report as DriftReport
+from evidently.legacy.metric_preset import DataDriftPreset
+
 
 
 app = FastAPI()
@@ -153,3 +160,74 @@ def predict(file: UploadFile = File(...)):
 
     label_map = {0: "NORMAL", 1: "PNEUMONIA"}
     return {"prediction": label_map[predicted_class], "class_index": predicted_class}
+
+
+# --- Drift detection configuration ---
+DRIFT_REF_PATH = (
+    Path(__file__).parent / "monitoring" / "artifacts" / "reference_features.csv"
+)
+_drift_ref_df: Optional[pd.DataFrame] = None
+
+
+def load_drift_reference() -> pd.DataFrame:
+    """Lazy-load reference feature distribution for drift detection."""
+    global _drift_ref_df
+    if _drift_ref_df is not None:
+        return _drift_ref_df
+
+    if not DRIFT_REF_PATH.exists():
+        raise RuntimeError(f"Reference drift file not found at {DRIFT_REF_PATH}")
+
+    df = pd.read_csv(DRIFT_REF_PATH)
+    if "label" in df.columns:
+        df = df.drop(columns=["label"])
+
+    _drift_ref_df = df
+    return df
+
+
+class FeatureRow(BaseModel):
+    mean_intensity: float = Field(..., example=0.42)
+    std_intensity: float = Field(..., example=0.18)
+    min_intensity: float = Field(..., example=0.0)
+    max_intensity: float = Field(..., example=0.97)
+
+
+class DriftFeaturesRequest(BaseModel):
+    rows: List[FeatureRow]
+
+
+
+@app.post("/drift/features")
+def drift_features(req: DriftFeaturesRequest):
+    # Load reference data
+    try:
+        reference_df = load_drift_reference()
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    # Current data from request
+    current_df = pd.DataFrame([r.model_dump() for r in req.rows])
+
+    # Run Evidently drift detection (legacy API in Evidently 0.7.x)
+    report = DriftReport(metrics=[DataDriftPreset()])
+    report.run(reference_data=reference_df, current_data=current_df)
+
+    rep = report.as_dict()
+    # Extract summary (defensive across minor schema differences)
+    result = rep.get("metrics", [{}])[0].get("result", {})
+
+    return {
+        "dataset_drift": result.get("dataset_drift"),
+        "number_of_drifted_columns": result.get("number_of_drifted_columns"),
+        "number_of_columns": result.get("number_of_columns"),
+        "share_of_drifted_columns": (
+            result.get("share_of_drifted_columns")
+            or result.get("drift_share")
+            or result.get("share_drifted_columns")
+        ),
+        "reference_rows": int(len(reference_df)),
+        "current_rows": int(len(current_df)),
+        "reference_path": str(DRIFT_REF_PATH),
+    }
+
