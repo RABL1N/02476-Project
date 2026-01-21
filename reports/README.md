@@ -123,7 +123,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 1 fill here ---
+85
 
 ### Question 2
 > **Enter the study number for each member in the group**
@@ -134,7 +134,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 2 fill here ---
+s234835, s215207, s215115, s257188
 
 ### Question 3
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
@@ -147,8 +147,10 @@ will check the repositories and the code to verify your answers.
 > *package to do ... and ... in our project*.
 >
 > Answer:
+> 
+Throughout the project we used a combination of open-source frameworks aligned with the DTU MLOps curriculum and applied them in practice to build a complete workflow. For data versioning, we used DVC together with a Google Cloud Storage remote, enabling reproducible dataset management beyond local files. Weights & Biases (wandb) was used for experiment tracking and model management, including logging metrics and managing model artifacts.
 
---- question 3 fill here ---
+The inference service was implemented using FastAPI, allowing us to expose model prediction endpoints for cloud deployment. To evaluate system performance under load, we used Locust to simulate concurrent users and stress-test the deployed API. Dependency management was handled using uv, which ensured consistent environments across local development, CI pipelines, and cloud machines by locking exact dependency versions. Together, these tools enabled an end-to-end MLOps pipeline covering data versioning, training, CI/CD, and deployment.
 
 ## Coding environment
 
@@ -168,7 +170,9 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 4 fill here ---
+We managed dependencies in this project using the uv package manager. All project dependencies are declared in the pyproject.toml file, which serves as the single source of truth for required packages. Exact, pinned dependency versions are stored in the automatically generated uv.lock file. This ensures that the same dependency versions are installed across different machines, operating systems, and environments.
+
+To obtain an exact copy of the development environment, a new team member would first need to clone the GitHub repository, then install uv and ensure it is available in their system path. From the project root, running uv sync will create a virtual environment and install all dependencies exactly as specified in uv.lock. The same setup is used in continuous integration workflows and cloud training environments, ensuring full reproducibility across local development, CI, and deployment.
 
 ### Question 5
 
@@ -184,7 +188,11 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 5 fill here ---
+The project was initialized using the provided cookiecutter MLOps template, which we followed closely and filled out the core components required for a complete MLOps workflow. The src/mlops_project directory contains the main application logic, including data handling, model definition, training, evaluation, and the FastAPI inference API. The tests directory was populated with unit tests for data processing, model construction, and training logic, following the structure suggested by the template.
+
+Configuration files were placed in the configs directory and managed using Hydra to support reproducible and configurable training experiments. The data directory was used together with DVC to track and version datasets stored remotely in a Google Cloud Storage bucket. Continuous integration workflows were implemented under .github/workflows, extending the template with additional pipelines for linting, data-change triggers, and staged model testing based on model registry updates.
+
+We deviated slightly from the original template by adding a frontend directory for a Streamlit application, a load_tests directory for Locust-based load testing, and additional Dockerfiles to support both training and deployment.
 
 ### Question 6
 
@@ -200,6 +208,8 @@ will check the repositories and the code to verify your answers.
 > Answer:
 
 --- question 6 fill here ---
+We used ruff for linting and ruff for formatting. We did not use typing a lot, but we did use Google-styled doc-strings for documentation, as well as mkdocs in extension to a README file. We implemented our formatting (as well as our tests) using github workflows, such that we automatically test linting when we push to main.
+These concepts are important in larger projects because they help prevent superficial mistakes and ensures that new developers can easily read the code which have been written. Typing (which we did not use extensively) can also help in catching early errors, especially in more complicated code with multiple types.
 
 ## Version control
 
@@ -219,6 +229,9 @@ will check the repositories and the code to verify your answers.
 > Answer:
 
 --- question 7 fill here ---
+We have implemented 77 pytest (uv run pytest --collect-only) style tests. Primarily we are testing our model, our training loop, our API, our dataloader/dataset and our staged models.
+We have chosen to test these, as they are some of the most crucial parts of our project. As stated above, we have created a github workflow to automatically run these tests, when we push to main.
+
 
 ### Question 8
 
@@ -234,6 +247,8 @@ will check the repositories and the code to verify your answers.
 > Answer:
 
 --- question 8 fill here ---
+Our code coverage is 24%. The data, evaluation, api and model scripts are the ones which are covered the best. However, we do not have any tests written for the code that was refactored for lightning, and our training loop is hard to test, as it is very integrated with wandb, and meant to be run with external dependencies, that makes testing harder.
+Even if we had 100% tests we would still not trust our code to be error free, as tests can only cover so much. There can always be edge cases that are not covered by the tests, and there can also be logical errors in the code that are not caught by the tests.
 
 ### Question 9
 
@@ -249,7 +264,7 @@ will check the repositories and the code to verify your answers.
 > Answer:
 
 --- question 9 fill here ---
-
+In our project we used branches a lot, but not pull requests, as we were a small group, so we mostly relied on real time communication in cases of code problems. Instead of having a branch for each person directly we mostly created branches for features or fixes that we wanted to implement, and then merged them into main when they were done. This helped us keep the main branch stable, as we could test the feature branches before merging them in. We used both git and github to manage our branches and used both the CLI for git and VSCode's git integration to manage our branches. 
 ### Question 10
 
 > **Did you use DVC for managing data in your project? If yes, then how did it improve your project to have version**
@@ -283,6 +298,12 @@ This enabled us to be able to all use the same dataset state with 'dvc pull' com
 > Answer:
 
 --- question 11 fill here ---
+For continious integration we have organized our workflows into a 6 separate files. 
+The first workflow (tests) is for testing our code, which includes running our unit tests and checking code coverage. This workflow tests multiple operating systems (Ubuntu and MacOS) and Python versions (3.12) to ensure compatibility across different environments. We also make use of caching for uv to speed up dependency installation. 
+The second workflow (stage_model and test_staged_model) is for testing newly staged models. This workflow is triggered by a repository dispatch event from WandB and tests the staged model using a separate test script. It also uses caching for uv and tests on Ubuntu. 
+The third (linting) is for checking linting of the code using ruff. This workflow is triggered on pushes and pull requests to the main branch and checks the code for linting errors.
+The fourth workflow (docs) is for building and deploying our documentation to GitHub pages. This workflow is triggered on pushes to the main branch and builds the documentation using mkdocs.
+The fifth workflow, data_changes is triggered when there are changes to data tracked by DVC. It runs tests to ensure that the code works with the new data.
 
 ## Running code and tracking experiments
 
@@ -302,6 +323,11 @@ This enabled us to be able to all use the same dataset state with 'dvc pull' com
 > Answer:
 
 --- question 12 fill here ---
+We configured our experiments using Hydra configuration files. The configuration files are stored in the configs directory to allow for easy management of different experiment settings. This way, we could run experiments with different configurations without changing the code itself. To run an experiment, we would simply change the config file and run the training script using uv.
+```bash
+uv run invoke train
+```
+
 
 ### Question 13
 
@@ -317,6 +343,7 @@ This enabled us to be able to all use the same dataset state with 'dvc pull' com
 > Answer:
 
 --- question 13 fill here ---
+To be able to reproduce our experiments, we have set up 2 safeguards, WandB and hydra. WandB saves every experiment that we run, including the config files, the metrics and the model artifacts. This way we can always go back and see what settings we used for a particular experiment, and we can also download the model artifacts to use them later. Hydra allows us to manage our configuration files in a structured way, so we can easily change settings and run experiments with different configurations. When we have completed a run, hydra also saves the configuration used for that experiments in the outputs directory, so we can always go back and see what settings we used for a particular experiment. To reproduce an experiment, one would have to go to WandB, find the experiment and download the config file and the model artifacts. Then one would have to set up the environment using uv and run the training script with the downloaded config file.
 
 ### Question 14
 
@@ -333,7 +360,17 @@ This enabled us to be able to all use the same dataset state with 'dvc pull' com
 >
 > Answer:
 
---- question 14 fill here ---
+We used Weights & Biases (W&B) to track all our training experiments for the chest X-ray pneumonia classification model. As seen in the first image (best_model_overview_v0.png), W&B automatically tracks system information including hardware specifications, Python version, operating system, and runtime environment. This information is crucial for reproducibility, as it ensures we can recreate the exact conditions under which our model was trained.
+
+![Best Model Overview](figures/best_model_overview_v0.png)
+
+As seen in the second image (best_model_charts_v0.png), we tracked and visualized key training and validation metrics including loss and accuracy for both training and validation sets. These metrics are logged at each epoch, allowing us to monitor the model's learning progress. The training loss and accuracy inform us about how well the model is learning from the training data, while validation metrics are crucial for assessing generalization performance. By comparing these curves, we can identify when the model starts overfitting (validation metrics plateau or worsen while training metrics continue improving) and implement early stopping accordingly.
+
+![Best Model Charts](figures/best_model_charts_v0.png)
+
+The third image (best_model_v0.png) shows the model artifact stored in W&B, which includes metadata such as the best validation accuracy (81.25%) and best validation loss. We also logged hyperparameters including learning rate, batch size, number of epochs, and model architecture parameters. These metrics are important because they enable us to compare different experimental runs, reproduce successful configurations, and select the best-performing model for deployment. The validation accuracy is particularly critical as it directly measures how well our model will perform on unseen data, which is the ultimate goal for a medical diagnosis application.
+
+![Best Model Artifact](figures/best_model_v0.png)
 
 ### Question 15
 
@@ -364,6 +401,10 @@ This enabled us to be able to all use the same dataset state with 'dvc pull' com
 > Answer:
 
 --- question 16 fill here ---
+For debugging we mostly used logging and the VSCode built in python debugger. Logging allowed us to see what was happening in the code without having to stop the execution, and the VSCode debugger allowed us to step through the code and see what was happening at each step. 
+For bugs in the infrastructure (CI/CD, DVC, GCP etc.) we mostly relied on the error messages provided by the services, as they were usually quite descriptive and pointed us in the right direction. On top of this we used the documentation of the services to understand what was going wrong.
+We did not do any profiling of our code, as we did not have any major performance issues. However, we did try to write efficient code from the start, as we knew that we would be running our code quite some times during development and testing.
+We could have used profiling to identify bottlenecks in our code, especially as we were running on a limited budget for GCP, but we found other tasks more interesting.
 
 ## Working in the cloud
 
@@ -400,7 +441,11 @@ Compute Engine is virtual machines used for running training jobs or experiments
 >
 > Answer:
 
---- question 18 fill here ---
+The GCP Engine was used as the primary infrastructure for model training in this project. We created a dedicated virtual machine (VM) to run training workloads that were computationally heavier than what was practical to run locally. The VM acted as a reproducible training environment that could be synced with the GitHub repository and the DVC-managed dataset stored in a Google Cloud Storage bucket.
+
+The VM was configured with a standard Linux-based image and sufficient CPU and memory resources to support training a convolutional neural network on image data. GPU acceleration was not strictly required for this project, so we relied on CPU-based instances. Dependencies were installed using the same uv-based setup as in local development to ensure environment consistency.
+
+Training was triggered manually after syncing the repository and data to the VM using provided setup and sync scripts. Experiment metrics and trained models were logged to Weights & Biases, allowing us to monitor training remotely without direct interaction with the VM. This setup ensured reproducibility, scalability, and separation between development and training environments.
 
 ### Question 19
 
@@ -442,7 +487,11 @@ Compute Engine is virtual machines used for running training jobs or experiments
 >
 > Answer:
 
---- question 22 fill here ---
+We managed to train our model in the cloud using the Engine (Google Cloud Compute Engine). We did this by creating a dedicated virtual machine instance in the europe-west1-d zone, which provided a reproducible training environment separate from our local development setup. The VM was configured with sufficient CPU and memory resources to handle training a convolutional neural network on chest X-ray images.
+
+To set up the training environment, we used setup scripts that cloned our GitHub repository to the VM and installed dependencies using the same uv-based package management system used locally, ensuring environment consistency. The training data was accessed from a Google Cloud Storage bucket managed through DVC, allowing the VM to pull the required datasets without storing them locally.
+
+Training was executed manually by SSH-ing into the VM and running the training script, which used PyTorch Lightning and logged all metrics and model artifacts to Weights & Biases. We chose the Engine over Vertex AI because it provided more direct control over the training environment, was simpler to set up for our needs, and offered a cost-effective solution for CPU-based training without requiring the additional abstraction layer that Vertex AI provides.
 
 ## Deployment
 
@@ -580,6 +629,7 @@ In total we ended up using 228.37 danish crowns (DKK). The largest factor came f
 > Answer:
 
 --- question 30 fill here ---
+For the unit testing and github workflows one of the biggest struggles was in getting the webhook to work between WandB and GitHub. This was a matter of setting up proper API keys and sharing permissions between the two services. This was especially cumbersome, as it would only be tested on new models being staged, meaning that we had to train a new model for each test of the webhook, and since our webhook was sent to GitHub, we could not (easily) test it locally using act.
 
 ### Question 31
 
@@ -597,4 +647,12 @@ In total we ended up using 228.37 danish crowns (DKK). The largest factor came f
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
---- question 31 fill here ---
+The-Laug (sXXXXXX) - Focused on core code development, refactoring, and training improvements. Their commits include adding PyTorch Lightning support and distributed data loading, work on staged model tests and CI integration, initial setup of model and training code, and other backend structural changes. This includes maintaining the model training logic and test setups that underpin correct automated workflows.
+
+AFugl (sXXXXXX) - Focused on API functionality, DevOps, and CI/CD infrastructure. Their commits include backend Docker work, adding and fixing API endpoints, load testing configuration, merging branches related to fastapi inference, updating checklist statuses, and tests to make api.py and CI tests work correctly. They also worked on GCP VM sync scripts and data versioning with DVC and GCS.
+
+s234835 - Contributed to project integration, usability, and system-level design. They implemented and refined a command-line interface for core workflows such as data downloading, training, and testing, ensuring consistent usage across local, CI, and cloud environments. They configured and debugged pre-commit hooks and GitHub Actions workflows, including linting, data-change triggers, and staged model validation. They also assisted with cloud deployment, designed and documented the overall MLOps architecture diagram, and contributed to the README and overall project documentation.
+
+RABL1N (sXXXXXX) - Contributed across multiple areas including foundational setup, initial model commits, training logic additions, DVC and GCS integration, WandB logging and model registry integration, and broader cloud deployment documentation. They also updated tests and fixed various configuration and GitHub Pages documentation issues.
+
+All members actively participated in code reviews, task coordination, debugging, and development decisions throughout the project. Generative AI tools such as ChatGPT were used to clarify concepts, write and debug code, and help generate documentation text, and GitHub Copilot was used to assist with writing and completing code segments.

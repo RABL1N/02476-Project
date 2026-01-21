@@ -55,49 +55,28 @@ from data ingestion to deployment and inference.
 ```mermaid
 flowchart LR
 
-  %% ===== DATA =====
-  subgraph DATA["Data"]
-    A["Chest Xray Dataset"]
-    B["DVC and GCS Bucket"]
-    A -->|download + version| B
-  end
+  DEV["Local Development"]
+  GH["GitHub"]
+  CI["GitHub Actions"]
+  TRAIN["GCP VM Training"]
+  WB["W&B"]
+  REG["Model Registry"]
+  IMG["Docker Image"]
+  API["FastAPI"]
+  DEPLOY["GCP Deployment"]
+  USER["User"]
 
-  %% ===== DEV + CI =====
-  subgraph DEV["Development and CI"]
-    GH["GitHub Repository"]
-    CI["GitHub Actions CI"]
-    GH -->|push / PR| CI
-  end
+  DEV -->|commit| GH
+  GH --> CI
+  CI --> TRAIN
+  TRAIN --> WB
+  WB --> REG
+  REG --> CI
+  CI --> IMG
+  IMG --> API
+  API --> DEPLOY
+  USER --> DEPLOY
 
-  %% ===== TRAINING =====
-  subgraph TRAIN["Training"]
-    VM["Training on GCP VM"]
-    WB["Weights and Biases"]
-    REG["Model Registry"]
-    B -->|dvc pull| VM
-    VM -->|train + log| WB
-    WB -->|artifact| REG
-  end
-
-  %% ===== VALIDATION / STAGING =====
-  subgraph VALID["Validation and Staging"]
-    ST["Staged Model Tests"]
-    REG -->|registry change| CI
-    CI --> ST
-    ST -->|pass| TAG["Tag as best"]
-  end
-
-  %% ===== DEPLOYMENT =====
-  subgraph DEPLOY["Deployment"]
-    IMG["Docker Image"]
-    API["FastAPI Inference API"]
-    CLOUD["GCP Deployment"]
-    TAG --> IMG
-    IMG --> API
-    API --> CLOUD
-  end
-
-  USER["End Users"] -->|HTTP requests| CLOUD
 ```
 
 ## Project structure
