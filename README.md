@@ -12,7 +12,7 @@ The dataset used in this project consists of chest X ray images from pediatric p
 
 The project will initially use a simple convolutional neural network for image classification. If time allows transfer learning with pretrained image classification models may be explored. The emphasis is on model training evaluation and reproducibility rather than model complexity.
 
-## Application Usage (M32)
+## Application Usage
 
 This project exposes a simple command-line interface for running the main workflows.
 All commands are executed from the project root using `uv`.
@@ -90,7 +90,7 @@ uv run python main.py test
 
 ### Extra
 
-* [ ] Write some documentation for your application (M32)
+* [X] Write some documentation for your application (M32)
 * [ ] Publish the documentation to GitHub Pages (M32)
 * [ ] Revisit your initial project description. Did the project turn out as you wanted?
 * [ ] Create an architectural diagram over your MLOps pipeline
