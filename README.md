@@ -6,7 +6,7 @@ The goal of this project is to develop a machine learning model that can classif
 
 ## Documentation
 
-Full documentation is available on [GitHub Pages](https://RABL1N.github.io/mlops_project).
+Full documentation is available on [GitHub Pages](https://rabl1n.github.io/02476-Project/).
 
 ## Overall project checklist
 

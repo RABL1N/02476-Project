@@ -1,7 +1,7 @@
 site_name: mlops_project
 site_author: ML-Ops Group 85
 docs_dir: source
-site_url: https://RABL1N.github.io/mlops_project
+site_url: https://rabl1n.github.io/02476-Project/
 
 theme:
   language: en
