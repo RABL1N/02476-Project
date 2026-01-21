@@ -147,8 +147,12 @@ s234835,
 > *package to do ... and ... in our project*.
 >
 > Answer:
+> 
+Throughout the project we used a combination of open-source frameworks, some of which are covered in the DTU MLOps curriculum and others that supported adjacent tasks. For data versioning, we used DVC in collaboration with a Google Cloud Storage remote, enabling efficient dataset management and reproducibility beyond local files. For experiment tracking and model management we used Weights & Biases (wandb), leveraging its logging, dashboard, and artifact registry features to monitor training runs and manage model versions.
 
---- question 3 fill here ---
+To build and serve the inference API we used FastAPI, a high-performance Python web framework that allowed us to expose model prediction endpoints for cloud deployment. For load testing the deployed service, we used Locust, which helped us simulate concurrent users and assess performance under stress.
+
+Dependency management was handled by uv, which ensured consistent environments across local machines, CI pipelines, and cloud machines by locking exact dependency versions. While many of these tools are aligned with concepts introduced in the course, using them in practice allowed us to assemble a complete end-to-end pipeline that spans dataset versioning, training, CI/CD, and deployment.
 
 ## Coding environment
 
@@ -171,6 +175,7 @@ s234835,
 We managed dependencies in this project using the uv package manager. All project dependencies are declared in the pyproject.toml file, which serves as the single source of truth for required packages. Exact, pinned dependency versions are stored in the automatically generated uv.lock file. This ensures that the same dependency versions are installed across different machines, operating systems, and environments.
 
 To obtain an exact copy of the development environment, a new team member would first need to clone the GitHub repository, then install uv and ensure it is available in their system path. From the project root, running uv sync will create a virtual environment and install all dependencies exactly as specified in uv.lock. This guarantees full reproducibility of the Python environment without manual version management.
+
 ### Question 5
 
 > **We expect that you initialized your project using the cookiecutter template. Explain the overall structure of your**
