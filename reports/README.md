@@ -460,7 +460,11 @@ Training was triggered manually after syncing the repository and data to the VM 
 >
 > Answer:
 
---- question 22 fill here ---
+We managed to train our model in the cloud using the Engine (Google Cloud Compute Engine). We did this by creating a dedicated virtual machine instance in the europe-west1-d zone, which provided a reproducible training environment separate from our local development setup. The VM was configured with sufficient CPU and memory resources to handle training a convolutional neural network on chest X-ray images.
+
+To set up the training environment, we used setup scripts that cloned our GitHub repository to the VM and installed dependencies using the same uv-based package management system used locally, ensuring environment consistency. The training data was accessed from a Google Cloud Storage bucket managed through DVC, allowing the VM to pull the required datasets without storing them locally.
+
+Training was executed manually by SSH-ing into the VM and running the training script, which used PyTorch Lightning and logged all metrics and model artifacts to Weights & Biases. We chose the Engine over Vertex AI because it provided more direct control over the training environment, was simpler to set up for our needs, and offered a cost-effective solution for CPU-based training without requiring the additional abstraction layer that Vertex AI provides.
 
 ## Deployment
 
