@@ -1,18 +1,22 @@
 from torch import nn
 import torch
+from pytorch_lightning import LightningModule
 
 
-class Model(nn.Module):
+class LitModel(LightningModule):
     """CNN model for chest X-ray pneumonia classification."""
 
-    def __init__(self, num_classes: int = 2) -> None:
+    def __init__(self, num_classes: int = 2, learning_rate: float = 1e-4) -> None:
         """Initialize the CNN model.
 
         Args:
             num_classes: Number of output classes (default: 2 for NORMAL/PNEUMONIA)
+            learning_rate: Learning rate for the optimizer (default: 1e-4)
         """
         super().__init__()
+        self.save_hyperparameters()
         self.num_classes = num_classes
+        self.learning_rate = learning_rate
 
         # Convolutional layers
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)
@@ -35,7 +39,7 @@ class Model(nn.Module):
         # Activation function
         self.relu = nn.ReLU()
     
-    def load_from_checkpoint(cls, checkpoint_path: str) -> "Model":
+    def load_from_checkpoint(cls, checkpoint_path: str) -> "LitModel":
         """Load model from a checkpoint file.
 
         Args:
@@ -88,10 +92,23 @@ class Model(nn.Module):
         x = self.fc2(x)
 
         return x
+    
+    def training_step(self, batch, batch_idx):
+        """Training step for PyTorch Lightning."""
+        images, labels = batch
+        outputs = self(images)
+        loss = nn.CrossEntropyLoss()(outputs, labels)
+        self.log('train_loss', loss)
+        return loss
+    
+    def configure_optimizers(self):
+        """Configure optimizers for PyTorch Lightning."""
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        return optimizer
 
 
 if __name__ == "__main__":
-    model = Model()
+    model = LitModel()
     # Test with a batch of images (batch_size=4, channels=3, height=224, width=224)
     x = torch.rand(4, 3, 224, 224)
     output = model(x)

@@ -12,9 +12,10 @@ from torchvision import transforms
 from tqdm import tqdm
 
 from mlops_project.data import ChestXRayDataset
-from mlops_project.model import Model
+from mlops_project.model import LitModel
 
 log = logging.getLogger(__name__)
+from pytorch_lightning import Trainer
 
 
 
@@ -28,214 +29,79 @@ def train(cfg: DictConfig) -> None:
     """
     # Get original working directory (Hydra changes it to outputs/)
     original_cwd = Path(get_original_cwd())
-    
+
     # Extract configuration values and resolve relative to original cwd
     data_dir = original_cwd / cfg.data_dir
     model_dir = original_cwd / cfg.model_dir
-
+    model_dir.mkdir(parents=True, exist_ok=True)
 
     batch_size = cfg.batch_size
     num_epochs = cfg.num_epochs
-    num_workers = getattr(cfg, "num_workers", 0)
 
-    learning_rate = cfg.learning_rate
-    num_classes = cfg.num_classes
+    # Extract entity and get Hydra trainer config
+    entity = cfg.wandb.get("entity", "mlops-group-85")
+    project = cfg.wandb.get("project", "mlops-project")
 
-    # Set device
-    if cfg.device is None:
-        device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
-    else:
-        device = cfg.device
+    # Use PyTorch Lightning Trainer
+    from pytorch_lightning.loggers import WandbLogger
+    from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
-    # Setup logging
-    log.info("Starting training with configuration:")
-    log.info(f"  Data directory: {data_dir}")
-    log.info(f"  Model directory: {model_dir}")
-    log.info(f"  Batch size: {batch_size}")
-    log.info(f"  Number of epochs: {num_epochs}")
-    log.info(f"  Learning rate: {learning_rate}")
-    log.info(f"  Number of classes: {num_classes}")
-    log.info(f"  Device: {device}")
-    log.info(f"  Number of workers: {num_workers}")
-
-    # Initialize WandB
-    # Ensure entity is set to team (required for registry linking)
-    entity = cfg.wandb.entity if cfg.wandb.entity else "mlops-group-85"
-    wandb_config = OmegaConf.to_container(cfg, resolve=True)
-    wandb.init(
-        project=cfg.wandb.project,
-        entity=entity,
-        name=getattr(cfg.wandb, "name", None),
-        tags=getattr(cfg.wandb, "tags", []),
-        notes=getattr(cfg.wandb, "notes", None),
-        config=wandb_config,
+    wandb_logger = WandbLogger(project=project, entity=entity, log_model=True)
+    checkpoint_callback = ModelCheckpoint(
+        dirpath=str(model_dir),
+        filename="best_model",
+        monitor="val_acc",
+        mode="max",
+        save_top_k=1,
+        save_last=True,
     )
-    log.info(f"WandB initialized: {wandb.run.url} (entity: {entity})")
-
-    # Create model directory
-    model_dir.mkdir(parents=True, exist_ok=True)
-
-    # Define transforms for training (with data augmentation) and validation
-    train_transform = transforms.Compose(
-        [
-            transforms.Resize(tuple(cfg.augmentation.train.resize)),
-            transforms.RandomHorizontalFlip(p=cfg.augmentation.train.random_horizontal_flip),
-            transforms.RandomRotation(degrees=cfg.augmentation.train.random_rotation),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=cfg.normalize.mean, std=cfg.normalize.std),
-        ]
+    early_stopping = EarlyStopping(
+        monitor="val_acc",
+        patience=getattr(cfg, "early_stopping_patience", 5),
+        mode="max",
+        verbose=True,
     )
 
-    val_transform = transforms.Compose(
-        [
-            transforms.Resize(tuple(cfg.augmentation.val.resize)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=cfg.normalize.mean, std=cfg.normalize.std),
-        ]
+    # Use Hydra configuration for trainer parameters
+    accelerator = cfg.trainer.get("accelerator", "gpu" if torch.cuda.is_available() else "cpu")
+    devices = cfg.trainer.get("devices", 1)
+
+    trainer = Trainer(
+        max_epochs=num_epochs,
+        logger=wandb_logger,
+        callbacks=[checkpoint_callback, early_stopping],
+        accelerator=accelerator,
+        devices=devices,
+        log_every_n_steps=10,
+        default_root_dir=str(model_dir),
     )
 
-    # Create datasets
-    train_dataset = ChestXRayDataset(data_dir, split="train", transform=train_transform)
-    val_dataset = ChestXRayDataset(data_dir, split="val", transform=val_transform)
+    # Load data
+    train_transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                           std=[0.229, 0.224, 0.225])
+    ])
 
+    train_dataset = ChestXRayDataset(data_dir, transform=train_transform)
+    val_dataset = ChestXRayDataset(data_dir, transform=train_transform)
 
-    # Override for fast/fake training
-    if getattr(cfg, "fake_training", False):
-        # Use only a few samples for speed
-        train_dataset.image_paths = train_dataset.image_paths[:4]
-        train_dataset.labels = train_dataset.labels[:4]
-        val_dataset.image_paths = val_dataset.image_paths[:2]
-        val_dataset.labels = val_dataset.labels[:2]
-        batch_size = 1 * len(train_dataset)
-        num_epochs = 1
-        log.info("FAKE TRAINING MODE: Using 4 train and 2 val samples, batch_size=4, num_epochs=1")
-    # Create data loaders
-    train_loader = DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers
-    )
-    val_loader = DataLoader(
-        val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers
-    )
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
-    log.info(f"Train dataset size: {len(train_dataset)}")
-    log.info(f"Validation dataset size: {len(val_dataset)}")
+    # Create model
+    model = LitModel(learning_rate=cfg.learning_rate)
 
-    # Initialize model
-    model = Model(num_classes=num_classes)
-    model = model.to(device)
-    num_params = sum(p.numel() for p in model.parameters())
-    log.info(f"Model has {num_params:,} parameters")
-    
-    # Log model architecture to WandB
-    wandb.config.update({"model_params": num_params})
+    # Train model
+    trainer.fit(model, train_loader, val_loader)
 
-    # Loss function and optimizer
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    # Save best model path for artifact logging
+    best_model_path = checkpoint_callback.best_model_path
+    log.info(f"Best model saved to: {best_model_path}")
 
-    # Training loop
-    best_val_acc = 0.0
-    best_val_loss = float("inf")
-    epochs_since_improvement = 0
-    patience = getattr(cfg, "early_stopping_patience", 5)
-
-    for epoch in range(num_epochs):
-        # Training phase
-        model.train()
-        train_loss = 0.0
-        train_correct = 0
-        train_total = 0
-
-        train_pbar = tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs} [Train]", leave=False)
-        for images, labels in train_pbar:
-            images = images.to(device)
-            labels = labels.to(device)
-
-            # Forward pass
-            optimizer.zero_grad()
-            outputs = model(images)
-            loss = criterion(outputs, labels)
-
-            # Backward pass
-            loss.backward()
-            optimizer.step()
-
-            # Statistics
-            train_loss += loss.item()
-            _, predicted = torch.max(outputs.data, 1)
-            train_total += labels.size(0)
-            train_correct += (predicted == labels).sum().item()
-
-            # Update progress bar
-            current_acc = 100 * train_correct / train_total
-            train_pbar.set_postfix({"loss": f"{loss.item():.4f}", "acc": f"{current_acc:.2f}%"})
-
-        train_acc = 100 * train_correct / train_total
-        avg_train_loss = train_loss / len(train_loader)
-
-        # Validation phase
-        model.eval()
-        val_loss = 0.0
-        val_correct = 0
-        val_total = 0
-
-        val_pbar = tqdm(val_loader, desc=f"Epoch {epoch+1}/{num_epochs} [Val]", leave=False)
-        with torch.no_grad():
-            for images, labels in val_pbar:
-                images = images.to(device)
-                labels = labels.to(device)
-
-                outputs = model(images)
-                loss = criterion(outputs, labels)
-
-                val_loss += loss.item()
-                _, predicted = torch.max(outputs.data, 1)
-                val_total += labels.size(0)
-                val_correct += (predicted == labels).sum().item()
-
-                # Update progress bar
-                current_acc = 100 * val_correct / val_total
-                val_pbar.set_postfix({"loss": f"{loss.item():.4f}", "acc": f"{current_acc:.2f}%"})
-
-        val_acc = 100 * val_correct / val_total
-        avg_val_loss = val_loss / len(val_loader)
-
-        # Log metrics to WandB
-        wandb.log(
-            {
-                "epoch": epoch + 1,
-                "train/loss": avg_train_loss,
-                "train/accuracy": train_acc,
-                "val/loss": avg_val_loss,
-                "val/accuracy": val_acc,
-            }
-        )
-
-        # Log progress
-        log.info(
-            f"Epoch [{epoch+1}/{num_epochs}] | "
-            f"Train Loss: {avg_train_loss:.4f}, Train Acc: {train_acc:.2f}% | "
-            f"Val Loss: {avg_val_loss:.4f}, Val Acc: {val_acc:.2f}%"
-        )
-
-        # Save best model and reset patience counter
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
-            best_val_loss = avg_val_loss
-            model_path = model_dir / "best_model.pt"
-            torch.save(model.state_dict(), model_path)
-            log.info(f"  -> Saved best model with validation accuracy: {val_acc:.2f}%")
-            wandb.run.summary["best_val_accuracy"] = best_val_acc
-            wandb.run.summary["best_val_loss"] = best_val_loss
-            epochs_since_improvement = 0
-        else:
-            epochs_since_improvement += 1
-
-        # Early stopping check
-        if epochs_since_improvement >= patience:
-            log.info(f"Early stopping triggered after {patience} epochs without improvement.")
-            break
-    
+    best_val_acc = checkpoint_callback.best_model_score
+    best_val_loss = getattr(checkpoint_callback, "best_model_loss", 0.0)
 
     log.info(f"Training completed! Best validation accuracy: {best_val_acc:.2f}%")
     log.info(f"Best model saved to: {model_dir / 'best_model.pt'}")
@@ -247,12 +113,10 @@ def train(cfg: DictConfig) -> None:
         description="Best model based on validation accuracy",
         metadata={"best_val_accuracy": best_val_acc, "best_val_loss": best_val_loss}
     )
-    artifact.add_file(str(model_dir / "best_model.pt"))
-    
+    artifact.add_file(str(best_model_path))
+
     # Get API instance and entity/project info for registry comparison
     # Ensure API is initialized with the correct entity
-    entity = wandb.run.entity or "mlops-group-85"
-    project = wandb.run.project or "mlops-project"
     
     # Initialize API - ensure it uses the same authentication as the run
     api = wandb.Api()

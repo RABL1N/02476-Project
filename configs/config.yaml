@@ -44,3 +44,8 @@ wandb:
 
 early_stopping_patience: 5
 fake_training: false
+
+trainer:
+  accelerator: "gpu"
+  devices: 1
+  max_epochs: 10

@@ -25,6 +25,7 @@ dependencies = [
     "httpx>=0.28.1",
     "hydra-core>=1.3.0",
     "kagglehub>=0.2.0",
+    "lightning>=2.6.0",
     "pathspec<1",
     "pillow>=10.0.0",
     "python-multipart>=0.0.21",
