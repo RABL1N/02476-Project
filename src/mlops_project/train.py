@@ -39,11 +39,7 @@ def train(cfg: DictConfig) -> None:
 
     # Set device
     if cfg.device is None:
-        device = (
-            "cuda"
-            if torch.cuda.is_available()
-            else "mps" if torch.backends.mps.is_available() else "cpu"
-        )
+        device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     else:
         device = cfg.device
 
@@ -78,9 +74,7 @@ def train(cfg: DictConfig) -> None:
     train_transform = transforms.Compose(
         [
             transforms.Resize(tuple(cfg.augmentation.train.resize)),
-            transforms.RandomHorizontalFlip(
-                p=cfg.augmentation.train.random_horizontal_flip
-            ),
+            transforms.RandomHorizontalFlip(p=cfg.augmentation.train.random_horizontal_flip),
             transforms.RandomRotation(degrees=cfg.augmentation.train.random_rotation),
             transforms.ToTensor(),
             transforms.Normalize(mean=cfg.normalize.mean, std=cfg.normalize.std),
@@ -108,16 +102,10 @@ def train(cfg: DictConfig) -> None:
         val_dataset.labels = val_dataset.labels[:2]
         batch_size = 1 * len(train_dataset)
         num_epochs = 1
-        log.info(
-            "FAKE TRAINING MODE: Using 4 train and 2 val samples, batch_size=4, num_epochs=1"
-        )
+        log.info("FAKE TRAINING MODE: Using 4 train and 2 val samples, batch_size=4, num_epochs=1")
     # Create data loaders
-    train_loader = DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True, num_workers=0
-    )
-    val_loader = DataLoader(
-        val_dataset, batch_size=batch_size, shuffle=False, num_workers=0
-    )
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
 
     log.info(f"Train dataset size: {len(train_dataset)}")
     log.info(f"Validation dataset size: {len(val_dataset)}")
@@ -148,9 +136,7 @@ def train(cfg: DictConfig) -> None:
         train_correct = 0
         train_total = 0
 
-        train_pbar = tqdm(
-            train_loader, desc=f"Epoch {epoch+1}/{num_epochs} [Train]", leave=False
-        )
+        train_pbar = tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs} [Train]", leave=False)
         for images, labels in train_pbar:
             images = images.to(device)
             labels = labels.to(device)
@@ -172,9 +158,7 @@ def train(cfg: DictConfig) -> None:
 
             # Update progress bar
             current_acc = 100 * train_correct / train_total
-            train_pbar.set_postfix(
-                {"loss": f"{loss.item():.4f}", "acc": f"{current_acc:.2f}%"}
-            )
+            train_pbar.set_postfix({"loss": f"{loss.item():.4f}", "acc": f"{current_acc:.2f}%"})
 
         train_acc = 100 * train_correct / train_total
         avg_train_loss = train_loss / len(train_loader)
@@ -185,9 +169,7 @@ def train(cfg: DictConfig) -> None:
         val_correct = 0
         val_total = 0
 
-        val_pbar = tqdm(
-            val_loader, desc=f"Epoch {epoch+1}/{num_epochs} [Val]", leave=False
-        )
+        val_pbar = tqdm(val_loader, desc=f"Epoch {epoch+1}/{num_epochs} [Val]", leave=False)
         with torch.no_grad():
             for images, labels in val_pbar:
                 images = images.to(device)
@@ -203,9 +185,7 @@ def train(cfg: DictConfig) -> None:
 
                 # Update progress bar
                 current_acc = 100 * val_correct / val_total
-                val_pbar.set_postfix(
-                    {"loss": f"{loss.item():.4f}", "acc": f"{current_acc:.2f}%"}
-                )
+                val_pbar.set_postfix({"loss": f"{loss.item():.4f}", "acc": f"{current_acc:.2f}%"})
 
         val_acc = 100 * val_correct / val_total
         avg_val_loss = val_loss / len(val_loader)
@@ -243,9 +223,7 @@ def train(cfg: DictConfig) -> None:
 
         # Early stopping check
         if epochs_since_improvement >= patience:
-            log.info(
-                f"Early stopping triggered after {patience} epochs without improvement."
-            )
+            log.info(f"Early stopping triggered after {patience} epochs without improvement.")
             break
 
     log.info(f"Training completed! Best validation accuracy: {best_val_acc:.2f}%")
@@ -276,11 +254,7 @@ def train(cfg: DictConfig) -> None:
         # Try to get the current "best" model from project artifacts
         try:
             current_best = api.artifact(f"{entity}/{project}/best_model:best")
-            current_best_acc = (
-                current_best.metadata.get("best_val_accuracy", -1.0)
-                if current_best.metadata
-                else -1.0
-            )
+            current_best_acc = current_best.metadata.get("best_val_accuracy", -1.0) if current_best.metadata else -1.0
 
             # Compare: higher validation accuracy is better
             # If equal, also promote if validation loss is better (lower)
@@ -293,9 +267,7 @@ def train(cfg: DictConfig) -> None:
             elif best_val_acc == current_best_acc:
                 # If accuracy is equal, check validation loss (lower is better)
                 current_best_loss = (
-                    current_best.metadata.get("best_val_loss", float("inf"))
-                    if current_best.metadata
-                    else float("inf")
+                    current_best.metadata.get("best_val_loss", float("inf")) if current_best.metadata else float("inf")
                 )
                 if best_val_loss < current_best_loss:
                     should_be_best = True
@@ -318,19 +290,13 @@ def train(cfg: DictConfig) -> None:
             # Check if it's actually a "not found" error or something else
             if "not found" in str(e).lower() or "does not exist" in str(e).lower():
                 should_be_best = True
-                log.info(
-                    "No existing 'best' model found. This will be the first 'best' model."
-                )
+                log.info("No existing 'best' model found. This will be the first 'best' model.")
             else:
                 # Some other error - log it but still try to set as best
-                log.warning(
-                    f"Error checking existing 'best' model: {e}. Assuming this is the first model."
-                )
+                log.warning(f"Error checking existing 'best' model: {e}. Assuming this is the first model.")
                 should_be_best = True
     except Exception as e:
-        log.warning(
-            f"Could not check existing 'best' model: {e}. Assuming this is the first model."
-        )
+        log.warning(f"Could not check existing 'best' model: {e}. Assuming this is the first model.")
         should_be_best = True
 
     # Set aliases: always "latest", and "best" if this model is better
@@ -351,9 +317,7 @@ def train(cfg: DictConfig) -> None:
     try:
         # Try linking immediately while run is active
         wandb.run.link_artifact(artifact=logged_artifact, target_path=registry_path)
-        log.info(
-            f"Artifact linked to registry: {registry_path} with aliases: {aliases}"
-        )
+        log.info(f"Artifact linked to registry: {registry_path} with aliases: {aliases}")
     except Exception as e1:
         # If immediate linking fails, wait for artifact to finalize and try API method
         log.warning(f"Immediate linking failed: {e1}")
@@ -362,33 +326,21 @@ def train(cfg: DictConfig) -> None:
 
         try:
             # Use API method after artifact is finalized
-            artifact_path = (
-                f"{entity}/{project}/{logged_artifact.name}:{logged_artifact.version}"
-            )
-            log.info(
-                f"Attempting to link artifact via API: {artifact_path} to {registry_path}"
-            )
+            artifact_path = f"{entity}/{project}/{logged_artifact.name}:{logged_artifact.version}"
+            log.info(f"Attempting to link artifact via API: {artifact_path} to {registry_path}")
             api_artifact = api.artifact(artifact_path)
             api_artifact.link(target_path=registry_path)
-            log.info(
-                f"Artifact linked to registry via API: {registry_path} with aliases: {aliases}"
-            )
+            log.info(f"Artifact linked to registry via API: {registry_path} with aliases: {aliases}")
         except Exception as e2:
             log.error(f"Failed to link artifact to registry: {e2}")
             log.error(f"Error type: {type(e2).__name__}")
             log.error(f"Error details: {str(e2)}")
             log.info(f"Artifact is still available in project with aliases: {aliases}")
-            log.info(
-                f"Artifact path: {artifact_path if 'artifact_path' in locals() else 'N/A'}"
-            )
+            log.info(f"Artifact path: {artifact_path if 'artifact_path' in locals() else 'N/A'}")
             log.info("")
             log.info("TROUBLESHOOTING:")
-            log.info(
-                f"1. Verify the registry '{registry_name}' exists and you have 'Member' or 'Admin' role"
-            )
-            log.info(
-                "2. Check registry permissions: https://wandb.ai/mlops-group-85/registries/02476_registry"
-            )
+            log.info(f"1. Verify the registry '{registry_name}' exists and you have 'Member' or 'Admin' role")
+            log.info("2. Check registry permissions: https://wandb.ai/mlops-group-85/registries/02476_registry")
             log.info("3. Ensure you're logged in: wandb login")
             log.info("4. Verify entity matches: entity should be 'mlops-group-85'")
             log.info("5. You can manually link artifacts in the WandB UI if needed")

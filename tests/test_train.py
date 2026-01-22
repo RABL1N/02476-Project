@@ -40,9 +40,7 @@ class TestTrainingLoop:
         final_loss = criterion(final_output, y)
 
         # Loss should decrease
-        assert (
-            final_loss.item() < initial_loss.item()
-        ), "Loss did not decrease during training"
+        assert final_loss.item() < initial_loss.item(), "Loss did not decrease during training"
 
     def test_model_parameters_update_during_training(self) -> None:
         """Test that model parameters actually change during training."""
@@ -109,9 +107,7 @@ class TestTrainingLoop:
         loss = criterion(output, y)
         loss.backward()
 
-        first_grads = [
-            p.grad.clone() if p.grad is not None else None for p in model.parameters()
-        ]
+        first_grads = [p.grad.clone() if p.grad is not None else None for p in model.parameters()]
 
         # Second backward pass without zero_grad
         output = model(x)

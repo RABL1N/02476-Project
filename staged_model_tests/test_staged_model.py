@@ -13,15 +13,11 @@ def load_model(artifact):
     api_key = os.getenv("WANDB_API_KEY")
     print(api_key)
     if not api_key:
-        raise RuntimeError(
-            "WANDB_API_KEY environment variable is not set. Please set it before running the test."
-        )
+        raise RuntimeError("WANDB_API_KEY environment variable is not set. Please set it before running the test.")
     entity = os.getenv("WANDB_ENTITY")
     project = os.getenv("WANDB_PROJECT")
     if not entity or not project:
-        raise RuntimeError(
-            "WANDB_ENTITY and WANDB_PROJECT environment variables must be set."
-        )
+        raise RuntimeError("WANDB_ENTITY and WANDB_PROJECT environment variables must be set.")
 
     api = wandb.Api(api_key=api_key, overrides={"entity": entity, "project": project})
     logdir = "./artifacts"

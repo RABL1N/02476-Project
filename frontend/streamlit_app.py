@@ -20,10 +20,7 @@ with st.sidebar:
 
 st.title("Chest X-Ray Pneumonia Detection")
 
-st.write(
-    "Upload a chest X-ray image and the model will predict "
-    "whether it shows **NORMAL** lungs or **PNEUMONIA**."
-)
+st.write("Upload a chest X-ray image and the model will predict " "whether it shows **NORMAL** lungs or **PNEUMONIA**.")
 
 uploaded_file = st.file_uploader(
     "Upload an X-ray image",
@@ -33,10 +30,10 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file is not None:
     col1, col2 = st.columns([2, 1])
-    
+
     with col1:
         st.image(uploaded_file, caption="Uploaded image", use_container_width=True)
-    
+
     with col2:
         st.write("**File Info:**")
         st.write(f"Name: {uploaded_file.name}")
@@ -98,7 +95,3 @@ if st.sidebar.button("Test API Connection"):
                 st.success("API is reachable!")
             except Exception as e:
                 st.error(f"API unreachable: {str(e)}")
-
-
-
-

@@ -101,9 +101,7 @@ class TestModelGradients:
         # Check that all parameters have gradients
         for name, param in model.named_parameters():
             assert param.grad is not None, f"No gradient for {name}"
-            assert torch.isfinite(
-                param.grad
-            ).all(), f"Gradient for {name} contains NaN or Inf"
+            assert torch.isfinite(param.grad).all(), f"Gradient for {name} contains NaN or Inf"
 
     def test_gradients_are_nonzero(self) -> None:
         """Test that at least some gradients are non-zero."""

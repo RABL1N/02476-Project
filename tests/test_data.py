@@ -69,9 +69,7 @@ class TestChestXRayDatasetSchema:
         image, _ = sample_dataset[0]
         assert image.dtype == torch.float32
 
-    def test_image_values_in_valid_range(
-        self, sample_dataset: ChestXRayDataset
-    ) -> None:
+    def test_image_values_in_valid_range(self, sample_dataset: ChestXRayDataset) -> None:
         """Test that normalized image values are in expected range."""
         image, _ = sample_dataset[0]
         assert torch.isfinite(image).all(), "Image contains NaN or Inf values"
@@ -112,17 +110,13 @@ class TestChestXRayDatasetDeterminism:
 
         return ChestXRayDataset(data_path, split="train")
 
-    def test_same_index_returns_consistent_image(
-        self, sample_dataset: ChestXRayDataset
-    ) -> None:
+    def test_same_index_returns_consistent_image(self, sample_dataset: ChestXRayDataset) -> None:
         """Test that loading the same index twice returns the same image tensor."""
         image_1, _ = sample_dataset[0]
         image_2, _ = sample_dataset[0]
         torch.testing.assert_close(image_1, image_2)
 
-    def test_same_index_returns_consistent_label(
-        self, sample_dataset: ChestXRayDataset
-    ) -> None:
+    def test_same_index_returns_consistent_label(self, sample_dataset: ChestXRayDataset) -> None:
         """Test that loading the same index twice returns the same label."""
         _, label_1 = sample_dataset[0]
         _, label_2 = sample_dataset[0]
@@ -146,15 +140,9 @@ class TestChestXRayDatasetLength:
         """Test that __len__ returns the total number of samples."""
         assert len(sample_dataset) > 0
 
-    def test_image_paths_and_labels_match_length(
-        self, sample_dataset: ChestXRayDataset
-    ) -> None:
+    def test_image_paths_and_labels_match_length(self, sample_dataset: ChestXRayDataset) -> None:
         """Test that image_paths and labels lists match dataset length."""
-        assert (
-            len(sample_dataset.image_paths)
-            == len(sample_dataset.labels)
-            == len(sample_dataset)
-        )
+        assert len(sample_dataset.image_paths) == len(sample_dataset.labels) == len(sample_dataset)
 
 
 class TestChestXRayDatasetLabels:
@@ -170,17 +158,13 @@ class TestChestXRayDatasetLabels:
 
         return ChestXRayDataset(data_path, split="train")
 
-    def test_both_classes_present_in_dataset(
-        self, sample_dataset: ChestXRayDataset
-    ) -> None:
+    def test_both_classes_present_in_dataset(self, sample_dataset: ChestXRayDataset) -> None:
         """Test that dataset contains both NORMAL and PNEUMONIA samples."""
         unique_labels = set(sample_dataset.labels)
         assert 0 in unique_labels
         assert 1 in unique_labels
 
-    def test_label_assignment_consistency(
-        self, sample_dataset: ChestXRayDataset
-    ) -> None:
+    def test_label_assignment_consistency(self, sample_dataset: ChestXRayDataset) -> None:
         """Test that labels are valid class indices 0 or 1."""
         for label in sample_dataset.labels:
             assert label in [0, 1]
@@ -211,9 +195,7 @@ class TestChestXRayDatasetTransforms:
             [
                 transforms.Resize((224, 224)),
                 transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-                ),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ]
         )
         return ChestXRayDataset(data_path, split="train", transform=transform)
@@ -272,9 +254,7 @@ class TestChestXRayDatasetWithDataLoader:
         assert images.shape == (2, 3, 224, 224)
         assert labels.shape == (2,)
 
-    def test_dataloader_iterates_multiple_batches(
-        self, sample_dataset: ChestXRayDataset
-    ) -> None:
+    def test_dataloader_iterates_multiple_batches(self, sample_dataset: ChestXRayDataset) -> None:
         """Test that DataLoader can iterate through multiple batches."""
         loader = DataLoader(sample_dataset, batch_size=2, shuffle=False)
         total_samples = 0
@@ -288,14 +268,10 @@ class TestChestXRayDatasetWithDataLoader:
         assert total_samples > 0, "DataLoader did not yield any samples"
         assert total_samples == min(max_batches * 2, len(sample_dataset))
 
-    def test_dataloader_shuffle_changes_order(
-        self, sample_dataset: ChestXRayDataset
-    ) -> None:
+    def test_dataloader_shuffle_changes_order(self, sample_dataset: ChestXRayDataset) -> None:
         """Test that shuffling produces different orderings."""
         batch_size = 10
-        loader_no_shuffle = DataLoader(
-            sample_dataset, batch_size=batch_size, shuffle=False
-        )
+        loader_no_shuffle = DataLoader(sample_dataset, batch_size=batch_size, shuffle=False)
         loader_shuffle = DataLoader(sample_dataset, batch_size=batch_size, shuffle=True)
 
         _, labels_no_shuffle = next(iter(loader_no_shuffle))

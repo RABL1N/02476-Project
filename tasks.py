@@ -26,6 +26,7 @@ def train(ctx: Context, fake_training: bool = False) -> None:
         cmd += " fake_training=true"
     ctx.run(cmd, echo=True, pty=not WINDOWS)
 
+
 @task(help={"fake_training": "Enable fast/fake training mode for CI or testing."})
 def lightning_train(ctx: Context, fake_training: bool = False) -> None:
     """Train model. Use --fake-training to enable fast/fake mode."""
@@ -33,6 +34,7 @@ def lightning_train(ctx: Context, fake_training: bool = False) -> None:
     if fake_training:
         cmd += " fake_training=true"
     ctx.run(cmd, echo=True, pty=not WINDOWS)
+
 
 @task
 def test(ctx: Context) -> None:
@@ -53,9 +55,7 @@ def download_model(ctx: Context, artifact: str = "best_model:best") -> None:
     # Set environment variables if not already set
     env_vars = {}
     if not os.environ.get("WANDB_API_KEY"):
-        print(
-            "Warning: WANDB_API_KEY not set. Make sure you're logged in with 'wandb login'"
-        )
+        print("Warning: WANDB_API_KEY not set. Make sure you're logged in with 'wandb login'")
 
     ctx.run(
         "uv run python download_model.py",
@@ -128,6 +128,4 @@ def build_docs(ctx: Context) -> None:
 @task
 def serve_docs(ctx: Context) -> None:
     """Serve documentation."""
-    ctx.run(
-        "uv run mkdocs serve --config-file docs/mkdocs.yaml", echo=True, pty=not WINDOWS
-    )
+    ctx.run("uv run mkdocs serve --config-file docs/mkdocs.yaml", echo=True, pty=not WINDOWS)

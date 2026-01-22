@@ -19,9 +19,7 @@ if __name__ == "__main__":
         # Test getting an item
         image, label = dataset[0]
         print(f"  First image shape: {image.shape}")
-        print(
-            f"  First label: {label.item()} ({'NORMAL' if label.item() == 0 else 'PNEUMONIA'})"
-        )
+        print(f"  First label: {label.item()} ({'NORMAL' if label.item() == 0 else 'PNEUMONIA'})")
         print(f"  Image dtype: {image.dtype}")
         print(f"  Image range: [{image.min():.3f}, {image.max():.3f}]")
 

@@ -19,7 +19,6 @@ from evidently.legacy.report import Report as DriftReport
 from evidently.legacy.metric_preset import DataDriftPreset
 
 
-
 app = FastAPI()
 
 app.add_middleware(
@@ -99,9 +98,7 @@ def model_info():
             {
                 "model_size_bytes": model_stat.st_size,
                 "model_size_mb": round(model_stat.st_size / (1024 * 1024), 2),
-                "model_modified": datetime.fromtimestamp(
-                    model_stat.st_mtime
-                ).isoformat(),
+                "model_modified": datetime.fromtimestamp(model_stat.st_mtime).isoformat(),
             }
         )
 
@@ -130,9 +127,7 @@ def model_info():
         except Exception as e:
             info["wandb_artifact"] = {"error": f"Could not read metadata: {e}"}
     else:
-        info["wandb_artifact"] = {
-            "note": "Metadata not available (model may not be from WandB)"
-        }
+        info["wandb_artifact"] = {"note": "Metadata not available (model may not be from WandB)"}
 
     return info
 
@@ -163,9 +158,7 @@ def predict(file: UploadFile = File(...)):
 
 
 # --- Drift detection configuration ---
-DRIFT_REF_PATH = (
-    Path(__file__).parent / "monitoring" / "artifacts" / "reference_features.csv"
-)
+DRIFT_REF_PATH = Path(__file__).parent / "monitoring" / "artifacts" / "reference_features.csv"
 _drift_ref_df: Optional[pd.DataFrame] = None
 
 
@@ -197,7 +190,6 @@ class DriftFeaturesRequest(BaseModel):
     rows: List[FeatureRow]
 
 
-
 @app.post("/drift/features")
 def drift_features(req: DriftFeaturesRequest):
     # Load reference data
@@ -222,12 +214,9 @@ def drift_features(req: DriftFeaturesRequest):
         "number_of_drifted_columns": result.get("number_of_drifted_columns"),
         "number_of_columns": result.get("number_of_columns"),
         "share_of_drifted_columns": (
-            result.get("share_of_drifted_columns")
-            or result.get("drift_share")
-            or result.get("share_drifted_columns")
+            result.get("share_of_drifted_columns") or result.get("drift_share") or result.get("share_drifted_columns")
         ),
         "reference_rows": int(len(reference_df)),
         "current_rows": int(len(current_df)),
         "reference_path": str(DRIFT_REF_PATH),
     }
-

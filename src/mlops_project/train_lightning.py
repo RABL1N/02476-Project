@@ -75,12 +75,13 @@ def train(cfg: DictConfig) -> None:
     )
 
     # Load data
-    train_transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                           std=[0.229, 0.224, 0.225])
-    ])
+    train_transform = transforms.Compose(
+        [
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ]
+    )
 
     train_dataset = ChestXRayDataset(data_dir, transform=train_transform)
     val_dataset = ChestXRayDataset(data_dir, transform=train_transform)
@@ -115,7 +116,7 @@ def train(cfg: DictConfig) -> None:
 
     # Get API instance and entity/project info for registry comparison
     # Ensure API is initialized with the correct entity
-    
+
     # Initialize API - ensure it uses the same authentication as the run
     api = wandb.Api()
 
@@ -127,11 +128,7 @@ def train(cfg: DictConfig) -> None:
         # Try to get the current "best" model from project artifacts
         try:
             current_best = api.artifact(f"{entity}/{project}/best_model:best")
-            current_best_acc = (
-                current_best.metadata.get("best_val_accuracy", -1.0)
-                if current_best.metadata
-                else -1.0
-            )
+            current_best_acc = current_best.metadata.get("best_val_accuracy", -1.0) if current_best.metadata else -1.0
 
             # Compare: higher validation accuracy is better
             # If equal, also promote if validation loss is better (lower)
@@ -144,9 +141,7 @@ def train(cfg: DictConfig) -> None:
             elif best_val_acc == current_best_acc:
                 # If accuracy is equal, check validation loss (lower is better)
                 current_best_loss = (
-                    current_best.metadata.get("best_val_loss", float("inf"))
-                    if current_best.metadata
-                    else float("inf")
+                    current_best.metadata.get("best_val_loss", float("inf")) if current_best.metadata else float("inf")
                 )
                 if best_val_loss < current_best_loss:
                     should_be_best = True
@@ -169,19 +164,13 @@ def train(cfg: DictConfig) -> None:
             # Check if it's actually a "not found" error or something else
             if "not found" in str(e).lower() or "does not exist" in str(e).lower():
                 should_be_best = True
-                log.info(
-                    "No existing 'best' model found. This will be the first 'best' model."
-                )
+                log.info("No existing 'best' model found. This will be the first 'best' model.")
             else:
                 # Some other error - log it but still try to set as best
-                log.warning(
-                    f"Error checking existing 'best' model: {e}. Assuming this is the first model."
-                )
+                log.warning(f"Error checking existing 'best' model: {e}. Assuming this is the first model.")
                 should_be_best = True
     except Exception as e:
-        log.warning(
-            f"Could not check existing 'best' model: {e}. Assuming this is the first model."
-        )
+        log.warning(f"Could not check existing 'best' model: {e}. Assuming this is the first model.")
         should_be_best = True
 
     # Set aliases: always "latest", and "best" if this model is better
@@ -202,9 +191,7 @@ def train(cfg: DictConfig) -> None:
     try:
         # Try linking immediately while run is active
         wandb.run.link_artifact(artifact=logged_artifact, target_path=registry_path)
-        log.info(
-            f"Artifact linked to registry: {registry_path} with aliases: {aliases}"
-        )
+        log.info(f"Artifact linked to registry: {registry_path} with aliases: {aliases}")
     except Exception as e1:
         # If immediate linking fails, wait for artifact to finalize and try API method
         log.warning(f"Immediate linking failed: {e1}")
@@ -213,33 +200,21 @@ def train(cfg: DictConfig) -> None:
 
         try:
             # Use API method after artifact is finalized
-            artifact_path = (
-                f"{entity}/{project}/{logged_artifact.name}:{logged_artifact.version}"
-            )
-            log.info(
-                f"Attempting to link artifact via API: {artifact_path} to {registry_path}"
-            )
+            artifact_path = f"{entity}/{project}/{logged_artifact.name}:{logged_artifact.version}"
+            log.info(f"Attempting to link artifact via API: {artifact_path} to {registry_path}")
             api_artifact = api.artifact(artifact_path)
             api_artifact.link(target_path=registry_path)
-            log.info(
-                f"Artifact linked to registry via API: {registry_path} with aliases: {aliases}"
-            )
+            log.info(f"Artifact linked to registry via API: {registry_path} with aliases: {aliases}")
         except Exception as e2:
             log.error(f"Failed to link artifact to registry: {e2}")
             log.error(f"Error type: {type(e2).__name__}")
             log.error(f"Error details: {str(e2)}")
             log.info(f"Artifact is still available in project with aliases: {aliases}")
-            log.info(
-                f"Artifact path: {artifact_path if 'artifact_path' in locals() else 'N/A'}"
-            )
+            log.info(f"Artifact path: {artifact_path if 'artifact_path' in locals() else 'N/A'}")
             log.info("")
             log.info("TROUBLESHOOTING:")
-            log.info(
-                f"1. Verify the registry '{registry_name}' exists and you have 'Member' or 'Admin' role"
-            )
-            log.info(
-                "2. Check registry permissions: https://wandb.ai/mlops-group-85/registries/02476_registry"
-            )
+            log.info(f"1. Verify the registry '{registry_name}' exists and you have 'Member' or 'Admin' role")
+            log.info("2. Check registry permissions: https://wandb.ai/mlops-group-85/registries/02476_registry")
             log.info("3. Ensure you're logged in: wandb login")
             log.info("4. Verify entity matches: entity should be 'mlops-group-85'")
             log.info("5. You can manually link artifacts in the WandB UI if needed")
