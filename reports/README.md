@@ -68,7 +68,7 @@ will check the repositories and the code to verify your answers.
 * [X] Build the docker files locally and make sure they work as intended (M10)
 * [X] Write one or multiple configurations files for your experiments (M11)
 * [X] Used Hydra to load the configurations and manage your hyperparameters (M11)
-* [ ] Use profiling to optimize your code (M12)
+* [X] Use profiling to optimize your code (M12)
 * [X] Use logging to log important events in your code (M14)
 * [X] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
 * [ ] Consider running a hyperparameter optimization sweep (M14)
@@ -665,6 +665,6 @@ MariusNiss (s234835) - Contributed to project integration, usability, and system
 
 RABL1N (s234806) - Contributed across multiple areas including foundational setup, initial model commits, training logic additions, DVC and GCS integration, WandB logging and model registry integration, and broader cloud deployment documentation. They also updated tests and fixed various configuration and GitHub Pages documentation issues.
 
-k-rst-n (s257188) - Chose the subject matter consistent with PhD topic. They helped plan tests and test workflows and CI/CD. Their commits contain housekeeping via ruff and documentation. Due to their limited prior experience, they leared a lot from the high level of expertise in the group.
+k-rst-n (s257188) - Chose the subject matter consistent with PhD topic. They helped plan tests and test workflows and CI/CD. Their commits contain housekeeping via ruff and documentation as well as profiling of the models. Due to their limited prior experience, they leared a lot from the high level of expertise in the group.
 
 All members actively participated in code reviews, task coordination, debugging, and development decisions throughout the project. Generative AI tools such as ChatGPT were used to clarify concepts, write and debug code, and help generate documentation text, and GitHub Copilot was used to assist with writing and completing code segments.
