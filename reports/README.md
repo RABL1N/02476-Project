@@ -295,8 +295,7 @@ This enabled us to be able to all use the same dataset state with 'dvc pull' com
 >
 > Answer:
 
-For continious integration we have organized our workflows into a 6 separate files.
-The first workflow (tests) is for testing our code, which includes running our unit tests and checking code coverage. This workflow tests multiple operating systems (Ubuntu and MacOS) and Python versions (3.12) to ensure compatibility across different environments. We also make use of caching for uv to speed up dependency installation.
+For continious integration we have organized our workflows into a 6 separate files in our GitHub Actions setup. The first workflow (tests) is for testing our code, which includes running our unit tests and checking code coverage. This workflow tests multiple operating systems (Ubuntu and MacOS) and Python versions (3.12) to ensure compatibility across different environments. We also make use of caching for uv to speed up dependency installation.
 The second workflow (stage_model and test_staged_model) is for testing newly staged models. This workflow is triggered by a repository dispatch event from WandB and tests the staged model using a separate test script. It also uses caching for uv and tests on Ubuntu.
 The third (linting) is for checking linting of the code using ruff. This workflow is triggered on pushes and pull requests to the main branch and checks the code for linting errors.
 The fourth workflow (docs) is for building and deploying our documentation to GitHub pages. This workflow is triggered on pushes to the main branch and builds the documentation using mkdocs.
@@ -636,6 +635,11 @@ Once a model has passed validation, it is packaged into a Docker image together 
 > Answer:
 
 For the unit testing and github workflows one of the biggest struggles was in getting the webhook to work between WandB and GitHub. This was a matter of setting up proper API keys and sharing permissions between the two services. This was especially cumbersome, as it would only be tested on new models being staged, meaning that we had to train a new model for each test of the webhook, and since our webhook was sent to GitHub, we could not (easily) test it locally using act.
+
+Another struggle we faced a lot was cloud permissions and IAM. Many of the failures we met throughout the project when working with Cloud Console were not code issues but instead during to lack of permissions for group members to fulfil different tasks. It was sometimes also not very clear by the error messages if the problem at hand was happening due to a lacking role of a functionality issue so each time it happened, a debugging process would start but likely end up with a new role for that user. Because of this, it was also difficult to provide minimal roles to group members as the priority to get things working often weighted more than giving the exact and minimal permission to perform a task. We image this would look different in an actual project setup.
+
+Setting up monitoring through Cloud Console was also difficult because, not because the actual setup was difficult, but because it was difficult to find an intuition about where the different thresholds should be placed to create meaningful errors that wasn't just spam. As this was a section in the learning material, to not overly warn people by alerts and only provide meaningful ones, it was investigated further, but to actually learn this, we would need more experience within the field. 
+
 
 ### Question 31
 
