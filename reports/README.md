@@ -209,7 +209,6 @@ We deviated slightly from the original template by adding a frontend directory f
 >
 > Answer:
 
---- question 6 fill here ---
 We used ruff for linting and ruff for formatting. We did not use typing a lot, but we did use Google-styled doc-strings for documentation, as well as mkdocs in extension to a README file. We implemented our formatting (as well as our tests) using github workflows, such that we automatically test linting when we push to main.
 These concepts are important in larger projects because they help prevent superficial mistakes and ensures that new developers can easily read the code which have been written. Typing (which we did not use extensively) can also help in catching early errors, especially in more complicated code with multiple types.
 
@@ -230,7 +229,6 @@ These concepts are important in larger projects because they help prevent superf
 >
 > Answer:
 
---- question 7 fill here ---
 We have implemented 77 pytest (uv run pytest --collect-only) style tests. Primarily we are testing our model, our training loop, our API, our dataloader/dataset and our staged models.
 We have chosen to test these, as they are some of the most crucial parts of our project. As stated above, we have created a github workflow to automatically run these tests, when we push to main.
 
@@ -247,7 +245,6 @@ We have chosen to test these, as they are some of the most crucial parts of our 
 >
 > Answer:
 
---- question 8 fill here ---
 Our code coverage is 24%. The data, evaluation, api and model scripts are the ones which are covered the best. However, we do not have any tests written for the code that was refactored for lightning, and our training loop is hard to test, as it is very integrated with wandb, and meant to be run with external dependencies, that makes testing harder.
 Even if we had 100% tests we would still not trust our code to be error free, as tests can only cover so much. There can always be edge cases that are not covered by the tests, and there can also be logical errors in the code that are not caught by the tests.
 
@@ -264,7 +261,6 @@ Even if we had 100% tests we would still not trust our code to be error free, as
 >
 > Answer:
 
---- question 9 fill here ---
 In our project we used branches a lot, but not pull requests, as we were a small group, so we mostly relied on real time communication in cases of code problems. Instead of having a branch for each person directly we mostly created branches for features or fixes that we wanted to implement, and then merged them into main when they were done. This helped us keep the main branch stable, as we could test the feature branches before merging them in. We used both git and github to manage our branches and used both the CLI for git and VSCode's git integration to manage our branches.
 
 ### Question 10
@@ -299,7 +295,6 @@ This enabled us to be able to all use the same dataset state with 'dvc pull' com
 >
 > Answer:
 
---- question 11 fill here ---
 For continious integration we have organized our workflows into a 6 separate files.
 The first workflow (tests) is for testing our code, which includes running our unit tests and checking code coverage. This workflow tests multiple operating systems (Ubuntu and MacOS) and Python versions (3.12) to ensure compatibility across different environments. We also make use of caching for uv to speed up dependency installation.
 The second workflow (stage_model and test_staged_model) is for testing newly staged models. This workflow is triggered by a repository dispatch event from WandB and tests the staged model using a separate test script. It also uses caching for uv and tests on Ubuntu.
@@ -324,7 +319,6 @@ The fifth workflow, data_changes is triggered when there are changes to data tra
 >
 > Answer:
 
---- question 12 fill here ---
 We configured our experiments using Hydra configuration files. The configuration files are stored in the configs directory to allow for easy management of different experiment settings. This way, we could run experiments with different configurations without changing the code itself. To run an experiment, we would simply change the config file and run the training script using uv.
 ```bash
 uv run invoke train
@@ -344,7 +338,6 @@ uv run invoke train
 >
 > Answer:
 
---- question 13 fill here ---
 To be able to reproduce our experiments, we have set up 2 safeguards, WandB and hydra. WandB saves every experiment that we run, including the config files, the metrics and the model artifacts. This way we can always go back and see what settings we used for a particular experiment, and we can also download the model artifacts to use them later. Hydra allows us to manage our configuration files in a structured way, so we can easily change settings and run experiments with different configurations. When we have completed a run, hydra also saves the configuration used for that experiments in the outputs directory, so we can always go back and see what settings we used for a particular experiment. To reproduce an experiment, one would have to go to WandB, find the experiment and download the config file and the model artifacts. Then one would have to set up the environment using uv and run the training script with the downloaded config file.
 
 ### Question 14
@@ -406,7 +399,6 @@ For API inference, we have two Docker images. The local API image (`dockerfiles/
 >
 > Answer:
 
---- question 16 fill here ---
 For debugging we mostly used logging and the VSCode built in python debugger. Logging allowed us to see what was happening in the code without having to stop the execution, and the VSCode debugger allowed us to step through the code and see what was happening at each step. 
 For bugs in the infrastructure (CI/CD, DVC, GCP etc.) we mostly relied on the error messages provided by the services, as they were usually quite descriptive and pointed us in the right direction. On top of this we used the documentation of the services to understand what was going wrong.
 We did not do any profiling of our code, as we did not have any major performance issues. However, we did try to write efficient code from the start, as we knew that we would be running our code quite some times during development and testing.
@@ -460,7 +452,7 @@ Training was triggered manually after syncing the repository and data to the VM 
 >
 > Answer:
 
-![my_image](figures/GCP_bucket.png)
+![bucket](figures/GCP_bucket.png)
 
 ### Question 20
 
@@ -469,7 +461,7 @@ Training was triggered manually after syncing the repository and data to the VM 
 >
 > Answer:
 
-![my_image](figures/GCP_registry.png)
+![registry](figures/GCP_registry.png)
 
 ### Question 21
 
@@ -478,7 +470,7 @@ Training was triggered manually after syncing the repository and data to the VM 
 >
 > Answer:
 
---- question 21 fill here ---
+![build_history](figures/GCP_build_history.png)
 
 ### Question 22
 
@@ -603,7 +595,8 @@ In total we ended up using 228.37 danish crowns (DKK). The largest factor came f
 >
 > Answer:
 
---- question 28 fill here ---
+We implemented a small frontend for our FastAPI backend. The frontend was used to make the model easier to test and demonstrate. It provides a simple interface where a user can upload a chest X-ray image and get back the predicted class (NORMAL vs PNEUMONIA). This also helped us verify the full flow end-to-end: request handling, preprocessing, model inference, and response formatting. The frontend was deployed in the same way as the backend (containerized and run through Cloud Run) so it matched the rest of our deployment setup.
+
 
 ### Question 29
 
@@ -642,7 +635,6 @@ Once a model has passed validation, it is packaged into a Docker image together 
 >
 > Answer:
 
---- question 30 fill here ---
 For the unit testing and github workflows one of the biggest struggles was in getting the webhook to work between WandB and GitHub. This was a matter of setting up proper API keys and sharing permissions between the two services. This was especially cumbersome, as it would only be tested on new models being staged, meaning that we had to train a new model for each test of the webhook, and since our webhook was sent to GitHub, we could not (easily) test it locally using act.
 
 ### Question 31
@@ -661,9 +653,9 @@ For the unit testing and github workflows one of the biggest struggles was in ge
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
-The-Laug (sXXXXXX) - Focused on core code development, refactoring, and training improvements. Their commits include adding PyTorch Lightning support and distributed data loading, work on staged model tests and CI integration, initial setup of model and training code, and other backend structural changes. This includes maintaining the model training logic and test setups that underpin correct automated workflows.
+The-Laug (s215115) - Focused on core code development, refactoring, and training improvements. Their commits include adding PyTorch Lightning support and distributed data loading, work on staged model tests and CI integration, initial setup of model and training code, and other backend structural changes. This includes maintaining the model training logic and test setups that underpin correct automated workflows.
 
-AFugl (sXXXXXX) - Focused on API functionality, DevOps, and CI/CD infrastructure. Their commits include backend Docker work, adding and fixing API endpoints, load testing configuration, merging branches related to fastapi inference, updating checklist statuses, and tests to make api.py and CI tests work correctly. They also worked on GCP VM sync scripts and data versioning with DVC and GCS.
+AFugl (s215207) - Focused on API functionality, DevOps, and CI/CD infrastructure. Their commits include backend Docker work, adding and fixing API endpoints, load testing configuration, merging branches related to fastapi inference, updating checklist statuses, and tests to make api.py and CI tests work correctly. They also worked on GCP VM sync scripts and data versioning with DVC and GCS.
 
 s234835 - Contributed to project integration, usability, and system-level design. They implemented and refined a command-line interface for core workflows such as data downloading, training, and testing, ensuring consistent usage across local, CI, and cloud environments. They configured and debugged pre-commit hooks and GitHub Actions workflows, including linting, data-change triggers, and staged model validation. They also assisted with cloud deployment, designed and documented the overall MLOps architecture diagram, and contributed to the README and overall project documentation.
 

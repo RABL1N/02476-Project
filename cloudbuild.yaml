@@ -5,9 +5,17 @@ steps:
       [
         "build",
         "-t",
-        "europe-west1-docker.pkg.dev/$PROJECT_ID/mlops/mlops-backend:latest",
+        "europe-west1-docker.pkg.dev/machineoperationproject/mlops-repo/mlops-backend:latest",
         "-f",
         "backend/Dockerfile",
+        "--build-arg",
+        "WANDB_API_KEY=${_WANDB_API_KEY}",
+        "--build-arg",
+        "WANDB_ENTITY=mlops-group-85",
+        "--build-arg",
+        "WANDB_PROJECT=mlops-project",
+        "--build-arg",
+        "WANDB_ARTIFACT=best_model:best",
         "."
       ]
 
@@ -16,8 +24,9 @@ steps:
     args:
       [
         "push",
-        "europe-west1-docker.pkg.dev/$PROJECT_ID/mlops/mlops-backend:latest"
+        "europe-west1-docker.pkg.dev/machineoperationproject/mlops-repo/mlops-backend:latest"
       ]
 
-options:
-  logging: CLOUD_LOGGING_ONLY
+#options:
+#  logging: CLOUD_LOGGING_ONLY
+
