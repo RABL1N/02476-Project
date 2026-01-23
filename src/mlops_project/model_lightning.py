@@ -43,7 +43,10 @@ class LitModel(LightningModule):
         """Load model from a checkpoint file.
 
         Args:
-            checkpoint_path: Path to the checkpoint file.
+            checkpoint_path: Path to the checkpoint file 
+            that was saved with torch.save(checkpoint_data, checkpoint_path), 
+            where checkpoint_data is a dict of the form 
+            checkpoint_data = {"num_classes": num_classes_to_save, "model_state_dict": model_to_save.state_dict()}.
         Returns:
             Loaded Model instance.
         """
