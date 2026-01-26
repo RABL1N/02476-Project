@@ -57,7 +57,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: matrix.operating-system == 'ubuntu-latest' && matrix.python-version == '3.12' && matrix.pytorch-version == '2.6.0'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           file: ./coverage.xml
           fail_ci_if_error: false
